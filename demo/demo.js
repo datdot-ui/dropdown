@@ -11,36 +11,67 @@ function demo () {
     const recipients = []
     const make = message_maker('dropdown / demo') 
     const logs = terminal({mode: 'comfortable', expanded: true}, protocol('logs'))
-    const option = 
+    const single_select_option = 
     {
         page: 'Demo',
-        name: 'terminal-layout-selector',
-        // mode : 'multiple-select',
+        name: 'terminal',
+        // mode : 'single-select',
+        expanded: false,
         body: {
             button_mode: 'selector',
-            content: 'Filter',
-            // button_icon: 'filter',
-            // path: 'assets',
             options: [
                 {
-                    text: 'Option1',
-                    current: true
+                    text: 'Compact messages',
+                    // current: false
+                    // selected: false
                 },
                 {
-                    text: 'Option2'
-                },
-                {
-                    text: 'Option3'
+                    text: 'Comfortable messages',
+                    current: true,
+                    // selected: true
                 }
             ]
         }
-        
+    }
+
+    const multiple_select_option = 
+    {
+        page: 'STEPS',
+        name: 'filter',
+        mode : 'multiple-select',
+        expanded: false,
+        body: {
+            content: 'Filter',
+            button_icon: 'filter',
+            // button_mode: 'selector',
+            options: [
+                {
+                    text: 'Option1',
+                    // selected: false
+                },
+                {
+                    text: 'Option2',
+                    selected: false
+                },
+                {
+                    text: 'Option3',
+                    selected: true
+                }
+            ]
+        }
     }
     
     const content = bel`
     <div class="${css.content}">
         <h1>Dropdown</h1>
-        ${dropdown(option, protocol(option.name))}
+        <aside class="${css.example}">
+            <h2>Single select</h2>
+            ${dropdown(single_select_option, protocol(single_select_option.name))}
+        </aside>
+        <aside class="${css.example}">
+            <h2>Mutiple select</h2>
+            ${dropdown(multiple_select_option, protocol(multiple_select_option.name))}
+        </aside>
     </div>`
     const container = bel`<div class="${css.container}">${content}</div>`
     const app = bel`<div class="${css.wrap}" data-state="debug">${container}${logs}</div>`
@@ -187,6 +218,9 @@ body {
     background-color: var(--color-white);
     height: 100%;
     overflow: hidden auto;
+}
+.example:last-child {
+    margin-top: 180px;
 }
 @media (max-width: 768px) {
     [data-state="debug"] {
