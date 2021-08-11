@@ -221,7 +221,7 @@ body {
     overflow: hidden auto;
 }
 .example:last-child {
-    margin-top: 180px;
+    margin-top: 100px;
 }
 @media (max-width: 768px) {
     [data-state="debug"] {
@@ -1407,7 +1407,9 @@ function i_button (option, protocol) {
             }
         }
         function changed_event (body) {
-            const [icon, text] = shadow.childNodes
+            const { childNodes } = shadow
+            const lists = shadow.firstChild.tagName === 'LI' ? childNodes : [...childNodes].filter( (child, index) => index !== 0)
+            const [icon, text] = lists
             if (text) {
                 text.textContent = body
             } else {
@@ -1431,7 +1433,7 @@ function i_button (option, protocol) {
             // toggle
             if (type === 'switched') return switched_event(data)
             // dropdown
-            if (type === 'expanded') return expanded_event(data)
+            if (type.match(/expanded|unexpanded/)) return expanded_event(data)
             // tab, checkbox
             if (type.match(/checked|unchecked/)) return checked_event(data)
             // option
@@ -1535,9 +1537,9 @@ function i_button (option, protocol) {
     :host(i-button) .icon {
         display: grid;
         justify-content: center;
-        align-item: center;
-        width: var(---icon-size);
-        height: var(---icon-size);
+        align-items: center;
+        width: var(--icon-size);
+        height: var(---con-size);
     }
     :host(i-button) .right .icon {
         grid-column-start: 2;
@@ -1546,6 +1548,7 @@ function i_button (option, protocol) {
         grid-column-start: 1;
     }
     :host(i-button) svg {
+        max-width: 100%;
         width: 100%;
         height: auto;
     }
@@ -1794,14 +1797,19 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
             const selected = !data
             const type = selected ? 'selected' : 'unselected'
             const { childNodes } = shadow
+            const lists = shadow.firstChild.tagName === 'LI' ? childNodes : [...childNodes].filter( (child, index) => index !== 0)
             if (mode === 'multiple-select') {
                 const make = message_maker(`${from} / option / ${flow}`)
-                childNodes.forEach( child => child.dataset.option === from ? child.setAttribute('aria-selected', selected) : false)
+                const arr = []
+                lists.forEach( child => {
+                    child.dataset.option === from ? child.setAttribute('aria-selected', selected) : false
+                    if (child.getAttribute('aria-selected') === 'true') arr[arr.length] = child.dataset.option
+                })
                 recipients[from]( make({type, data: selected}) )
-                send( make({to: name, type, data: {option: from, selected} }))
+                send( make({to: name, type, data: {current_selected: arr, length: arr.length}}))
             }
             if (mode === 'single-select') {
-                childNodes.forEach( child => {
+                lists.forEach( child => {
                     const state = from === child.dataset.option ? !data : data
                     const current = state ? from : child.dataset.option
                     const make = message_maker(`${current} / option / ${flow}`)
@@ -1825,7 +1833,7 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
             const role = head[0].split(' / ')[1]
             const from = head[0].split(' / ')[0]
             if (type === 'click') return handle_select_event(from, data)
-            if (type === 'expanded') return handle_expanded_event(data)
+            if (type.match(/expanded|unexpanded/)) return handle_expanded_event(data)
         }
     }
 
@@ -2330,7 +2338,7 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
         function handle_expanded () {
             // trigger expanded event via document.body
             document.body.addEventListener('click', (e)=> {
-                const type = 'expanded'
+                const type = 'unexpanded'
                 const to = 'dropdown-list / listbox / ui-list'
                 if (e.target !== dropdown) {
                     dropdown_list.remove()
@@ -2351,13 +2359,14 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
         }
 
         function handle_dropdown_menu_event (from, data) {
-            const type = 'expanded'
+            const state = !data
+            const type = state ? 'expanded' : 'unexpanded'
             const to = 'dropdown-list / listbox / ui-list'
-            is_expanded = !data
+            is_expanded = state
             shadow.append(dropdown_list)
             recipients['dropdown-list']( make({type, data}) )
-            recipients[from]( make({to, type, data: is_expanded}) )
-            send( make({to, type, data: {expanded: is_expanded }}) )
+            recipients[from]( make({to, type, data: state}) )
+            send( make({to, type, data: {expanded: state }}) )
         }
 
         function dropdown_protocol (name) {

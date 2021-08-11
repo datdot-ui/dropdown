@@ -74,7 +74,7 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
         function handle_expanded () {
             // trigger expanded event via document.body
             document.body.addEventListener('click', (e)=> {
-                const type = 'expanded'
+                const type = 'unexpanded'
                 const to = 'dropdown-list / listbox / ui-list'
                 if (e.target !== dropdown) {
                     dropdown_list.remove()
@@ -95,13 +95,14 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
         }
 
         function handle_dropdown_menu_event (from, data) {
-            const type = 'expanded'
+            const state = !data
+            const type = state ? 'expanded' : 'unexpanded'
             const to = 'dropdown-list / listbox / ui-list'
-            is_expanded = !data
+            is_expanded = state
             shadow.append(dropdown_list)
             recipients['dropdown-list']( make({type, data}) )
-            recipients[from]( make({to, type, data: is_expanded}) )
-            send( make({to, type, data: {expanded: is_expanded }}) )
+            recipients[from]( make({to, type, data: state}) )
+            send( make({to, type, data: {expanded: state }}) )
         }
 
         function dropdown_protocol (name) {
