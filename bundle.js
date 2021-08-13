@@ -16,10 +16,12 @@ function demo () {
     {
         page: 'Demo',
         name: 'terminal',
-        // mode : 'single-select',
+        mode : 'single-select',
         expanded: false,
+        disabled: false,
         body: {
             button_mode: 'selector',
+            list_name: 'terminal-selector',
             options: [
                 {
                     text: 'Compact messages',
@@ -41,10 +43,12 @@ function demo () {
         name: 'filter',
         mode : 'multiple-select',
         expanded: false,
+        disabled: false,
         body: {
             content: 'Filter',
             button_icon: 'filter',
-            // button_mode: 'selector',
+            button_mode: 'selector',
+            list_name: 'filter-options',
             options: [
                 {
                     text: 'Option1',
@@ -111,21 +115,26 @@ const css = csjs`
     --color-ultra-red: 348, 96%, 71%;
     --color-flame: 15, 80%, 50%;
     --color-verdigris: 180, 54%, 43%;
-    --color-viridian-green: 180, 100%, 63%;
     --color-maya-blue: 205, 96%, 72%;
     --color-slate-blue: 248, 56%, 59%;
     --color-blue-jeans: 204, 96%, 61%;
     --color-dodger-blue: 213, 90%, 59%;
+    --color-viridian-green: 180, 100%, 63%;
+    --color-green: 136, 81%, 34%;
     --color-light-green: 127, 86%, 77%;
     --color-lime-green: 127, 100%, 40%;
     --color-slimy-green: 108, 100%, 28%;
     --color-maximum-blue-green: 180, 54%, 51%;
-    --color-green-pigment: 136, 81%, 34%;
+    --color-green: 136, 81%, 34%;
+    --color-light-green: 97, 86%, 77%;
+    --color-lincoln-green: 97, 100%, 18%;
     --color-yellow: 44, 100%, 55%;
     --color-chrome-yellow: 39, var(--r);
     --color-bright-yellow-crayola: 35, 100%, 58%;
+    --color-green-yellow-crayola: 51, 100%, 83%;
     --color-purple: 283, var(--r);
     --color-medium-purple: 269, 100%, 70%;
+    --color-electric-violet: 276, 98%, 48%;
     --color-grey33: var(--b), 20%;
     --color-grey66: var(--b), 40%;
     --color-grey70: var(--b), 44%;
@@ -140,7 +149,6 @@ const css = csjs`
     --color-greyED: var(--b), 93%;
     --color-greyEF: var(--b), 94%;
     --color-greyF2: var(--b), 95%;
-    --color-green: 136, 81%, 34%;
     --transparent: transparent;
     --define-font: *---------------------------------------------*;
     --size12: 1.2rem;
@@ -1004,7 +1012,7 @@ function terminal ({to = 'terminal', mode = 'compact', expanded = false}, protoc
     function get (msg) {
         const {head, refs, type, data, meta} = msg
         // make an object for type, count, color
-        const init = t => ({type: t, count: 0, color: type.match(/ready|click|triggered|opened|closed|checked|unchecked|selected|unselected|error|warning|toggled|changed/) ? null : int2hsla(str2hashint(t)) })
+        const init = t => ({type: t, count: 0, color: type.match(/ready|click|triggered|opened|closed|checked|unchecked|selected|unselected|expanded|unexpanded|error|warning|toggled|changed/) ? null : int2hsla(str2hashint(t)) })
         // to check type is existing then do count++, else return new type
         const add = t => ((types[t] || (types[t] = init(t))).count++, types[t])
         add(type)
@@ -1228,6 +1236,14 @@ log-list .list:last-child {
     --bg-color: var(--color-safety-orange);
     --opacity: 1;
 }
+[aria-type="expanded"] {
+    --bg-color: var(--color-electric-violet);
+    --opacity: 1;
+}
+[aria-type="unexpanded"] {
+    --bg-color: var(--color-electric-violet);
+    --opacity: .6;
+}
 log-list .list:last-child .type {}
 log-list .list:last-child .arrow {
     --color: var(--color-white);
@@ -1387,7 +1403,7 @@ function i_button (option, protocol) {
         }
         // dropdown menu
         function expanded_event (data) {
-            is_expanded = data
+            is_expanded = !data
             el.setAttribute('aria-expanded', is_expanded)
         }
         // tab checked
@@ -1408,7 +1424,7 @@ function i_button (option, protocol) {
         }
         function changed_event (body) {
             const { childNodes } = shadow
-            const lists = shadow.firstChild.tagName === 'LI' ? childNodes : [...childNodes].filter( (child, index) => index !== 0)
+            const lists = shadow.firstChild.tagName !== 'STYLE' ? childNodes : [...childNodes].filter( (child, index) => index !== 0)
             const [icon, text] = lists
             if (text) {
                 text.textContent = body
@@ -1423,7 +1439,10 @@ function i_button (option, protocol) {
             const type = 'click'
             if (role === 'tab') return send( make({type, data: is_checked}) )
             if (role === 'switch') return send( make({type, data: is_checked}) )
-            if (role === 'listbox') return send( make({type, data: is_expanded}) )
+            if (role === 'listbox') {
+                is_expanded = !is_expanded
+                return send( make({type, data: {expanded: is_expanded}}) )
+            }
             if (role === 'option') return send( make({type, data: is_selected}) )
             send( make({type}) )
         }
@@ -1433,7 +1452,7 @@ function i_button (option, protocol) {
             // toggle
             if (type === 'switched') return switched_event(data)
             // dropdown
-            if (type.match(/expanded|unexpanded/)) return expanded_event(data)
+            if (type.match(/expanded|unexpanded/)) return expanded_event(!data)
             // tab, checkbox
             if (type.match(/checked|unchecked/)) return checked_event(data)
             // option
@@ -1453,7 +1472,7 @@ function i_button (option, protocol) {
             bg_color, bg_color_hover, border_color_hover,
             border_width, border_style, border_opacity, border_color, border_radius, 
             padding, width, height, opacity,
-            fill, fill_hover, icon_size, current_fill, current_hover_fill,
+            fill, fill_hover, fill_opacity, icon_size, current_fill, current_hover_fill,
             shadow_color, offset_x, offset_y, blur, shadow_opacity,
             shadow_color_hover, offset_x_hover, offset_y_hover, blur_hover, shadow_opacity_hover
         } = theme.props
@@ -1592,6 +1611,25 @@ function i_button (option, protocol) {
     :host(i-button[role="listbox"]) .icon {
         ${body && icon !== '' ? 'grid-column-start: 2;' : ''}
     }
+    :host(i-button[role="option"]) {
+        display: grid;
+        grid-template-rows: 24px;
+        grid-template-columns: 20px auto;
+        justify-content: left;
+    }
+    :host(i-button[role="option"]) .text {
+        display: block;
+        grid-column-start: 2;
+    }
+    :host(i-button[role="option"]:hover) g {
+        --fill-hover: ${fill_hover ? fill_hover : 'var(--primary-color)'};
+    }
+    :host(i-button[aria-current="true"]:hover) g {
+        --fill-hover: ${fill_hover ? fill_hover : 'var(--color-white)'};
+    }
+    :host(i-button[role="option"][aria-selected="false"]) .icon {
+        display: none;
+    }
     :host(i-button[aria-current="true"]), :host(i-button[aria-current="true"]:hover) {
         --bold: ${current_weight ? current_weight : 'initial'};
         --color: ${current_color ? current_color : 'var(--color-white)'};
@@ -1626,29 +1664,35 @@ function i_button (option, protocol) {
         --bg-color: ${bg_color ? bg_color : 'var(--color-white)'};
         --color-opacity: .6;
         --bg-color-opacity: .3;
+        --border-width: ${border_width ? border_width : '0'};
+        --border-style: ${border_style ? border_style : 'solid'};
+        --border-color: ${border_color ? border_color : 'var(--color)'};
+        --border-opacity: .6;
+        --border: var(--border-width) var(--border-style) hsla(var(--border-color), var(--border-opacity)); 
         color: hsla(var(--color), var(--color-opacity));
         background-color: hsla(var(--bg-color), var(--bg-color-opacity));
+        border: var(--border);
         pointer-events: none;
         cursor: not-allowed;
     }
-    :host(i-button[role="option"]) {
-        display: grid;
-        grid-template-rows: 24px;
-        grid-template-columns: 20px auto;
-        justify-content: left;
+    :host(i-button[role="listbox"][disabled]) {
+        --color: ${color ? color : 'var(--color-dark)'};
+        --bg-color: ${bg_color ? bg_color : 'var(--color-greyCB)'};
+        --color-opacity: .6;
+        --bg-color-opacity: .4;
+        --border-width: ${border_width ? border_width : '1px'};
+        --border-style: ${border_style ? border_style : 'solid'};
+        --border-color: ${border_color ? border_color : 'var(--color)'};
+        --border-opacity: .4;
+        --border: var(--border-width) var(--border-style) hsla(var(--border-color), var(--border-opacity)); 
+        color: hsla(var(--color), var(--color-opacity));
+        background-color: hsla(var(--bg-color), var(--bg-color-opacity));
+        border: var(--border);
     }
-    :host(i-button[role="option"]) .text {
-        display: block;
-        grid-column-start: 2;
-    }
-    :host(i-button[role="option"]:hover) g {
-        --fill-hover: ${fill_hover ? fill_hover : 'var(--primary-color)'};
-    }
-    :host(i-button[aria-current="true"]:hover) g {
-        --fill-hover: ${fill_hover ? fill_hover : 'var(--color-white)'};
-    }
-    :host(i-button[role="option"][aria-selected="false"]) .icon {
-        display: none;
+    :host(i-button[role="listbox"][disabled]) g {
+        --fill: ${fill ? fill : 'var(--color-dark)'};
+        --fill-opacity: ${fill_opacity ? fill_opacity : '0.5'};
+        fill: hsla(var(--fill), var(--fill-opacity));
     }
     ${custom_style}
     `
@@ -1797,7 +1841,7 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
             const selected = !data
             const type = selected ? 'selected' : 'unselected'
             const { childNodes } = shadow
-            const lists = shadow.firstChild.tagName === 'LI' ? childNodes : [...childNodes].filter( (child, index) => index !== 0)
+            const lists = shadow.firstChild.tagName !== 'STYLE' ? childNodes : [...childNodes].filter( (child, index) => index !== 0)
             if (mode === 'multiple-select') {
                 const make = message_maker(`${from} / option / ${flow}`)
                 const arr = []
@@ -1806,7 +1850,7 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
                     if (child.getAttribute('aria-selected') === 'true') arr[arr.length] = child.dataset.option
                 })
                 recipients[from]( make({type, data: selected}) )
-                send( make({to: name, type, data: {current_selected: arr, length: arr.length}}))
+                send( make({to: name, type, data: {mode, selected: arr, length: arr.length}}))
             }
             if (mode === 'single-select') {
                 lists.forEach( child => {
@@ -1815,7 +1859,7 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
                     const make = message_maker(`${current} / option / ${flow}`)
                     const type = state ? 'selected' : 'unselected'
                     recipients[current]( make({type, data: state}) )
-                    send(make({to: name, type, data: {option: current, selected: state, current: state} }))
+                    send(make({to: name, type, data: {mode, selected: from} }))
                     list.setAttribute('aria-activedescendant', from)
                 })
             }
@@ -2273,7 +2317,7 @@ const i_icon = require('datdot-ui-icon')
 module.exports = i_dropdown
 
 function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expanded = false, disabled = false, mode = 'single-select', theme}, protocol) {
-    let {content, button_mode = 'dropdown', button_icon = 'arrow-down', list_icon = 'check', path = 'assets', options } = body
+    let {content, button_mode = 'dropdown', button_icon = 'arrow-down', list_name = 'dropdown-list', list_icon = 'check', path = 'assets', options } = body
     const recipients = []
     const make = message_maker(`${name} / ${flow} / ${page}`)
     const message = make({type: 'ready'})
@@ -2281,16 +2325,21 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
     const check_selected_undefined = (args) => args.selected === undefined 
     let is_expanded = expanded
     let is_disabled = disabled
+    let store_selected = []
 
-    var arr = (mode === 'single-select') ? make_single_select() : (mode === 'multiple-select') ? make_multiple_select() : options
-   
+    const arr = (mode === 'single-select') ? make_single_select() : (mode === 'multiple-select') ? make_multiple_select() : options
+
+    arr.filter( item => {
+        if (item.selected) return store_selected.push(item.text)
+    })
+
     function widget () {
         const send = protocol(get)
         const dropdown = document.createElement('i-dropdown')
         const shadow = dropdown.attachShadow({mode: 'closed'})
         const btn = button(
         {
-            name: `${name}-selector`,
+            name: `${name}-dropdown`,
             role: 'listbox', 
             icon: i_icon({name: button_icon, path}),
             body: button_mode === 'selector' || content !== void 0 ? content : void 0,
@@ -2313,24 +2362,25 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
                     border_style: 'solid'
                 }
             }
-        }, dropdown_protocol(`${name}-selector`))
+        }, dropdown_protocol(`${name}-dropdown`))
 
         const dropdown_list = list(
         {
-            name: 'dropdown-list', 
+            name: list_name, 
             body: arr, 
             mode,
             expanded: is_expanded,
             hidden: !is_expanded
-        }, dropdown_protocol('dropdown-list'))
-
-        dropdown.setAttribute('aria-label', name)
-        style_sheet(shadow, style)
-        
-        shadow.append(btn)
-        if (is_expanded) shadow.append(dropdown_list)
-
+        }, dropdown_protocol(list_name))
         send(message)
+        dropdown.setAttribute('aria-label', name)
+        dropdown.setAttribute('disabled', is_disabled)
+        style_sheet(shadow, style)
+        shadow.append(btn)
+        if (is_expanded) {
+            shadow.append(dropdown_list)
+            send(make({type: 'expanded', data: {selected: store_selected}}))
+        }
         handle_expanded()
         
         return dropdown
@@ -2339,34 +2389,41 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
             // trigger expanded event via document.body
             document.body.addEventListener('click', (e)=> {
                 const type = 'unexpanded'
-                const to = 'dropdown-list / listbox / ui-list'
+                const to = `${list_name} / listbox / ui-list`
                 if (e.target !== dropdown) {
                     dropdown_list.remove()
                     if (is_expanded) {
                         is_expanded = !is_expanded
-                        recipients[`${name}-selector`]( make({to, type, data: is_expanded }) )
-                        send( make({to, type, data: {expanded: is_expanded }}) )
+                        recipients[`${name}-dropdown`]( make({to, type, data: is_expanded}) )
+                        send( make({to, type, data: {selected: store_selected}}) )
                     }
                 }
             })
         }
 
-        function handle_change_selector (from, data) {
-            if (mode !== 'single-select' || button_mode == 'dropdown') return
-            const message = make({to: `${name}-selector / listbox / ui-button`, type: 'changed', data: data.option, refs: [data]})
-            recipients[`${name}-selector`](message)
-            send(message)
+        function handle_change_selector (data) {
+            const {mode, selected} = data
+            if (button_mode == 'dropdown') return
+            if (mode === 'single-select') {
+                const message = make({to: `${name}-dropdown / listbox / ui-button`, type: 'changed', data: selected, refs: [data]})
+                recipients[`${name}-dropdown`](message)
+                send(message)
+                store_selected = selected
+            }
+            if (mode === 'multiple-select') {
+                store_selected = selected
+            }
         }
 
         function handle_dropdown_menu_event (from, data) {
-            const state = !data
+            const state = data.expanded
             const type = state ? 'expanded' : 'unexpanded'
-            const to = 'dropdown-list / listbox / ui-list'
+            const to = `${list_name} / listbox / ui-list`
             is_expanded = state
             shadow.append(dropdown_list)
-            recipients['dropdown-list']( make({type, data}) )
+            recipients[list_name]( make({type, data: !state}) )
             recipients[from]( make({to, type, data: state}) )
-            send( make({to, type, data: {expanded: state }}) )
+            send( make({to, type, data: {selected: store_selected}}) )
         }
 
         function dropdown_protocol (name) {
@@ -2381,7 +2438,7 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
             const from = head[0].split('/')[0].trim()
             send(msg)
             if (type === 'click') return handle_dropdown_menu_event(from, data)
-            if (type === 'selected') return handle_change_selector(from, data)
+            if (type.match(/selected|unselected/)) return handle_change_selector(data)
         }
     }
 
@@ -2423,7 +2480,7 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
         const check_options_selected = options.every(check_selected_undefined)
         return options.map((opt, index) => {
             const obj = {...opt, icon: i_icon({name: list_icon, path})}
-            console.log('selected undefined:', check_options_selected);
+            // console.log('selected undefined:', check_options_selected);
             if (check_options_selected) obj.selected = check_options_selected
             obj.selected = opt.selected === undefined ? true : opt.selected 
             return obj
@@ -2435,6 +2492,9 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
         position: relative;
         display: grid;
         width: 100%;
+    }
+    :host(i-dropdown[disabled]) {
+        cursor: not-allowed;
     }
     i-list {
         position: absolute;

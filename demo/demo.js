@@ -15,10 +15,12 @@ function demo () {
     {
         page: 'Demo',
         name: 'terminal',
-        // mode : 'single-select',
+        mode : 'single-select',
         expanded: false,
+        disabled: false,
         body: {
             button_mode: 'selector',
+            list_name: 'terminal-selector',
             options: [
                 {
                     text: 'Compact messages',
@@ -40,10 +42,12 @@ function demo () {
         name: 'filter',
         mode : 'multiple-select',
         expanded: false,
+        disabled: false,
         body: {
             content: 'Filter',
             button_icon: 'filter',
-            // button_mode: 'selector',
+            button_mode: 'selector',
+            list_name: 'filter-options',
             options: [
                 {
                     text: 'Option1',
@@ -110,21 +114,26 @@ const css = csjs`
     --color-ultra-red: 348, 96%, 71%;
     --color-flame: 15, 80%, 50%;
     --color-verdigris: 180, 54%, 43%;
-    --color-viridian-green: 180, 100%, 63%;
     --color-maya-blue: 205, 96%, 72%;
     --color-slate-blue: 248, 56%, 59%;
     --color-blue-jeans: 204, 96%, 61%;
     --color-dodger-blue: 213, 90%, 59%;
+    --color-viridian-green: 180, 100%, 63%;
+    --color-green: 136, 81%, 34%;
     --color-light-green: 127, 86%, 77%;
     --color-lime-green: 127, 100%, 40%;
     --color-slimy-green: 108, 100%, 28%;
     --color-maximum-blue-green: 180, 54%, 51%;
-    --color-green-pigment: 136, 81%, 34%;
+    --color-green: 136, 81%, 34%;
+    --color-light-green: 97, 86%, 77%;
+    --color-lincoln-green: 97, 100%, 18%;
     --color-yellow: 44, 100%, 55%;
     --color-chrome-yellow: 39, var(--r);
     --color-bright-yellow-crayola: 35, 100%, 58%;
+    --color-green-yellow-crayola: 51, 100%, 83%;
     --color-purple: 283, var(--r);
     --color-medium-purple: 269, 100%, 70%;
+    --color-electric-violet: 276, 98%, 48%;
     --color-grey33: var(--b), 20%;
     --color-grey66: var(--b), 40%;
     --color-grey70: var(--b), 44%;
@@ -139,7 +148,6 @@ const css = csjs`
     --color-greyED: var(--b), 93%;
     --color-greyEF: var(--b), 94%;
     --color-greyF2: var(--b), 95%;
-    --color-green: 136, 81%, 34%;
     --transparent: transparent;
     --define-font: *---------------------------------------------*;
     --size12: 1.2rem;
