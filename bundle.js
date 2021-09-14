@@ -11,7 +11,7 @@ const message_maker = require('../src/node_modules/message-maker')
 function demo () {
     const recipients = []
     const make = message_maker('dropdown / demo') 
-    const logs = terminal({mode: 'comfortable', expanded: true}, protocol('logs'))
+    const logs = terminal({mode: 'comfortable', expanded: false}, protocol('logs'))
     const single_select_option = 
     {
         page: 'Demo',
@@ -19,21 +19,30 @@ function demo () {
         mode : 'single-select',
         expanded: false,
         disabled: false,
-        body: {
-            button_mode: 'selector',
-            list_name: 'terminal-selector',
-            options: [
-                {
-                    text: 'Compact messages',
-                    // current: false
-                    // selected: false
-                },
-                {
-                    text: 'Comfortable messages',
-                    current: true,
-                    // selected: true
-                }
-            ]
+        options: {
+            button: {
+                name: 'terminal',
+                // select: {name: 'star'}
+            },
+            list: {
+                name: 'terminal-selector',
+                array: [
+                    {
+                        text: 'Compact messages',
+                        icon: {name: 'plus'},
+                        cover: 'https://cdn.pixabay.com/photo/2021/08/07/08/49/building-6528075_960_720.jpg'
+                        // current: true,
+                        // selected: false
+                    },
+                    {
+                        text: 'Comfortable messages',
+                        icon: {name: 'edit'},
+                        cover: 'https://cdn.pixabay.com/photo/2021/08/23/12/41/foxtail-6567731_960_720.jpg'
+                        // current: true,
+                        // selected: true
+                    }
+                ] 
+            }
         }
     }
 
@@ -44,25 +53,64 @@ function demo () {
         mode : 'multiple-select',
         expanded: false,
         disabled: false,
-        body: {
-            content: 'Filter',
-            button_icon: 'filter',
-            button_mode: 'selector',
-            list_name: 'filter-options',
-            options: [
-                {
-                    text: 'Option1',
-                    // selected: false
+        options: {
+            button: {
+                name: 'filter',
+                body: 'Filter',
+                // mode: 'selector',
+                icons: {
+                    select: {name: 'filter'},
+                    icon: {name: 'edit'}
                 },
-                {
-                    text: 'Option2',
-                    selected: false
-                },
-                {
-                    text: 'Option3',
-                    selected: true
-                }
-            ]
+                cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            },
+            list: {
+                name: 'filter-options',
+                array: [
+                    {
+                        text: 'Option1',
+                        cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                        list: {name: 'star'},
+                        // selected: false
+                    },
+                    {
+                        text: 'Option2',
+                        list: {name: 'star'},
+                        selected: false
+                    },
+                    {
+                        text: 'Option3',
+                        list: {name: 'star'},
+                        selected: true
+                    }
+                ],
+            }
+        },
+        // body: {
+        //     content: 'Filter',
+        //     dropdown_icon: {dropdown_icon_name: 'filter'},
+        //     button_mode: 'selector',
+        //     list_name: 'filter-options',
+        //     list_icon: {list_icon_name: 'star'},
+        //     options: [
+        //         {
+        //             text: 'Option1',
+        //             // selected: false
+        //         },
+        //         {
+        //             text: 'Option2',
+        //             selected: false
+        //         },
+        //         {
+        //             text: 'Option3',
+        //             selected: true
+        //         }
+        //     ]
+        // },
+        theme: {
+            props: {
+                margin_top: '23px'
+            }
         }
     }
     
@@ -92,41 +140,43 @@ function demo () {
 
     function get (msg) {
         const {head, refs, type, data} = msg 
-        const from = head[0].split('/')[0].trim()
+        // const from = head[0].split('/')[0].trim()
         recipients['logs'](msg)
     }
 }
 
 const css = csjs`
 :root {
+    /* define colors ---------------------------------------------*/
     --b: 0, 0%;
     --r: 100%, 50%;
     --color-white: var(--b), 100%;
     --color-black: var(--b), 0%;
     --color-dark: 223, 13%, 20%;
     --color-deep-black: 222, 18%, 11%;
-    --color-blue: 214, var(--r);
     --color-red: 358, 99%, 53%;
-    --color-amaranth-pink: 331, 86%, 78%;
-    --color-persian-rose: 323, 100%, 56%;
-    --color-orange: 35, 100%, 58%;
+    --color-amaranth-pink: 329, 100%, 65%;
+    --color-persian-rose: 323, 100%, 50%;
+    --color-orange: 32, var(--r);
+    --color-light-orange: 36, 100%, 55%;
     --color-safety-orange: 27, 100%, 50%;
     --color-deep-saffron: 31, 100%, 56%;
     --color-ultra-red: 348, 96%, 71%;
     --color-flame: 15, 80%, 50%;
     --color-verdigris: 180, 54%, 43%;
+    --color-viridian-green: 180, 100%, 63%;
+    --color-blue: 214, 100%, 49%;
+    --color-heavy-blue: 233, var(--r);
     --color-maya-blue: 205, 96%, 72%;
     --color-slate-blue: 248, 56%, 59%;
     --color-blue-jeans: 204, 96%, 61%;
     --color-dodger-blue: 213, 90%, 59%;
-    --color-viridian-green: 180, 100%, 63%;
-    --color-green: 136, 81%, 34%;
-    --color-light-green: 127, 86%, 77%;
+    --color-light-green: 97, 86%, 77%;
     --color-lime-green: 127, 100%, 40%;
     --color-slimy-green: 108, 100%, 28%;
     --color-maximum-blue-green: 180, 54%, 51%;
-    --color-green: 136, 81%, 34%;
-    --color-light-green: 97, 86%, 77%;
+    --color-deep-green: 136, 79%, 22%;
+    --color-green: 136, 82%, 38%;
     --color-lincoln-green: 97, 100%, 18%;
     --color-yellow: 44, 100%, 55%;
     --color-chrome-yellow: 39, var(--r);
@@ -150,9 +200,12 @@ const css = csjs`
     --color-greyEF: var(--b), 94%;
     --color-greyF2: var(--b), 95%;
     --transparent: transparent;
-    --define-font: *---------------------------------------------*;
+    /* define font ---------------------------------------------*/
+    --snippet-font: Segoe UI Mono, Monospace, Cascadia Mono, Courier New, ui-monospace, Liberation Mono, Menlo, Monaco, Consolas;
     --size12: 1.2rem;
+    --size13: 1.3rem;
     --size14: 1.4rem;
+    --size15: 1.5rem;
     --size16: 1.6rem;
     --size18: 1.8rem;
     --size20: 2rem;
@@ -162,13 +215,157 @@ const css = csjs`
     --size28: 2.8rem;
     --size30: 3rem;
     --size32: 3.2rem;
+    --size34: 3.4rem;
     --size36: 3.6rem;
+    --size38: 3.8rem;
     --size40: 4rem;
-    --define-primary: *---------------------------------------------*;
-    --primary-color: var(--color-black);
-    --primary-bgColor: var(--color-greyF2);
+    --size42: 4.2rem;
+    --size44: 4.4rem;
+    --size46: 4.6rem;
+    --size48: 4.8rem;
+    --size50: 5rem;
+    --size52: 5.2rem;
+    --size54: 5.4rem;
+    --size56: 5.6rem;
+    --size58: 5.8rem;
+    --size60: 6rem;
+    --weight100: 100;
+    --weight300: 300;
+    --weight400: 400;
+    --weight600: 600;
+    --weight800: 800;
+    /* define primary ---------------------------------------------*/
+    --primary-body-bg-color: var(--color-greyF2);
     --primary-font: Arial, sens-serif;
-    --primary-font-size: var(--size16);
+    --primary-size: var(--size14);
+    --primary-size-hover: var(--primary-size);
+    --primary-weight: 300;
+    --primary-weight-hover: 300;
+    --primary-color: var(--color-black);
+    --primary-color-hover: var(--color-white);
+    --primary-bg-color: var(--color-white);
+    --primary-bg-color-hover: var(--color-black);
+    --primary-border-width: 1px;
+    --primary-border-style: solid;
+    --primary-border-color: var(--color-black);
+    --primary-border-opacity: 1;
+    --primary-radius: 8px;
+    --primary-avatar-width: 100%;
+    --primary-avatar-height: auto;
+    --primary-avatar-radius: 0;
+    --primary-disabled-size: var(--primary-size);
+    --primary-disabled-color: var(--color-greyA2);
+    --primary-disabled-bg-color: var(--color-greyEB);
+    --primary-disabled-icon-size: var(--primary-icon-size);
+    --primary-disabled-icon-fill: var(--color-greyA2);
+    --primary-listbox-option-icon-size: 20px;
+    --primary-listbox-option-avatar-width: 40px;
+    --primary-listbox-option-avatar-height: auto;
+    --primary-listbox-option-avatar-radius: var(--primary-avatar-radius);
+    --primary-option-avatar-width: 30px;
+    --primary-option-avatar-height: auto;
+    --primary-list-avatar-width: 30px;
+    --primary-list-avatar-height: auto;
+    --primary-list-avatar-radius: var(--primary-avatar-radius);
+    /* define icon settings ---------------------------------------------*/
+    --primary-icon-size: var(--size16);
+    --primary-icon-size-hover: var(--size16);
+    --primary-icon-fill: var(--primary-color);
+    --primary-icon-fill-hover: var(--primary-color-hover);
+    /* define current ---------------------------------------------*/
+    --current-size: var(--primary-size);
+    --current-weight: var(--primary-weight);
+    --current-color: var(--color-white);
+    --current-bg-color: var(--color-black);
+    --current-icon-size: var(--primary-icon-size);
+    --current-icon-fill: var(--color-white);
+    --current-list-selected-icon-size: var(--list-selected-icon-size);
+    --current-list-selected-icon-fill: var(--color-white);
+    --current-list-selected-icon-fill-hover: var(--color-white);
+    --current-list-size: var(--current-size);
+    --current-list-color: var(--current-color);
+    --current-list-bg-color: var(--current-bg-color);
+    --current-list-avatar-width: var(--primary-list-avatar-width);
+    --current-list-avatar-height: var(--primary-list-avatar-height);
+    /* role listbox settings ---------------------------------------------*/
+    /*-- collapse --*/
+    --listbox-collapse-icon-size: var(--size20);
+    --listbox-collapse-icon-size-hover: var(--size20);
+    --listbox-collapse-icon-fill: var(--primary-icon-fill);
+    --listbox-collapse-icon-fill-hover: var(--primary-icon-fill-hover);
+    --listbox-collapse-option-size: var(--primary-size);
+    --listbox-collapse-option-size-hover: var(--primary-size-hover);
+    --listbox-collapse-option-weight: var(--primary-weight);
+    --listbox-collapse-option-weight-hover: var(--primary-weight);
+    --listbox-collapse-option-color: var(--primary-color);
+    --listbox-collapse-option-color-hover: var(--primary-color-hover);
+    --listbox-collapse-option-avatar-width: var(--primary-listbox-option-avatar-width);
+    --listbox-collapse-option-avatar-height: var(--primary-listbox-option-avatar-height);
+    --listbox-collapse-option-icon-size: var(--primary-listbox-option-icon-size);
+    --listbox-collapse-option-icon-size-hover: var(--primary-listbox-option-icon-size);
+    --listbox-collapse-option-icon-fill: var(--color-blue);
+    --listbox-collapse-option-icon-fill-hover: var(--color-yellow);
+    /*-- expanded ---*/
+    --listbox-expanded-icon-size: var(--size20);
+    --listbox-expanded-icon-size-hover: var(--size20);
+    --listbox-expanded-icon-fill: var(--color-light-green);
+    --listbox-expanded-icon-fill-hover: var(--color-yellow);
+    --listbox-expanded-option-size: var(--size20);
+    --listbox-expanded-option-size-hover: var(--size36);
+    --listbox-expanded-option-weight: var(--primary-weight);
+    --listbox-expanded-option-weight-hover: var(--primary-weight);
+    --listbox-expanded-option-color: var(--current-color);
+    --listbox-expanded-option-color-hover: var(--listbox-expanded-color);
+    --listbox-expanded-option-avatar-width: var(--primary-listbox-option-avatar-width);
+    --listbox-expanded-option-avatar-height: var(--primary-listbox-option-avatar-height);
+    --listbox-expanded-option-icon-size: var(--primary-listbox-option-icon-size);
+    --listbox-expanded-option-icon-size-hover: var(--primary-listbox-option-icon-size);
+    --listbox-expanded-option-icon-fill: var(--color-light-green);
+    --listbox-expanded-option-icon-fill-hover: var(--color-orange);
+    /* role option settings ---------------------------------------------*/
+    --list-bg-color: var(--primary-bg-color);
+    --list-bg-color-hover: var(--primary-bg-color-hover);
+    --list-selected-icon-size: var(--size16);
+    --list-selected-icon-size-hover: var(--list-selected-icon-size);
+    --list-selected-icon-fill: var(--primary-icon-fill);
+    --list-selected-icon-fill-hover: var(--primary-icon-fill-hover);
+    /* role link settings ---------------------------------------------*/
+    --link-size: var(--size14);
+    --link-size-hover: var(--primary-link-size);
+    --link-color: var(--color-heavy-blue);
+    --link-color-hover: var(--color-dodger-blue);
+    --link-bg-color: transparent;
+    --link-icon-size: var(--size30);
+    --link-icon-fill: var(--primary-link-color);
+    --link-icon-fill-hover: var(--primary-link-color-hover);
+    --link-avatar-width: 24px;
+    --link-avatar-width-hover: var(--link-avatar-width);
+    --link-avatar-height: auto;
+    --link-avatar-height-hover: var(--link-avatar-height);
+    --link-avatar-radius: 0;
+    --link-disabled-size: var(--primary-link-size);
+    --link-disabled-color: var(--color-greyA2);
+    --link-disabled-bg-color: transparent;
+    --link-disabled-icon-fill: var(--color-greyA2);
+    /* role menuitem settings ---------------------------------------------*/
+    --menu-size: var(--size15);
+    --menu-size-hover: var(--menu-size);
+    --menu-weight: var(--primary-weight);
+    --menu-weigh-hover: var(--primary-weight);
+    --menu-color: var(--primary-color);
+    --menu-color-hover: var(--color-grey88);
+    --menu-icon-size: 20px;
+    --menu-icon-size-hover: var(--menu-icon-size);
+    --menu-icon-fill: var(--primary-color);
+    --menu-icon-fill-hover: var(--color-grey88);
+    --menu-avatar-width: 50px;
+    --menu-avatar-width-hover: var(--menu-avatar-width);
+    --menu-avatar-height: auto;
+    --menu-avatar-height-hover: var(--menu-avatar-height);
+    --menu-avatar-radius: 0;
+    --menu-disabled-color: var(--primary-disabled-color);
+    --menu-disabled-size: var(--menu-size);
+    --menu-disabled-weight: var(--primary-weight);
 }
 html {
     font-size: 62.5%;
@@ -180,10 +377,10 @@ html {
 body {
     margin: 0;
     padding: 0;
-    font-size: var(--primary-size);
+    font-size: calc(var(--primary-size) + 2px);
     -webkit-text-size-adjust:100%;
     font-family: var(--primary-font);
-    background-color: hsl( var(--primary-bg-color) );
+    background-color: hsl( var(--primary-body-bg-color) );
     height: 100%;
     overflow: hidden;
 }
@@ -247,7 +444,7 @@ body {
 `
 
 document.body.append(demo())
-},{"..":40,"../src/node_modules/message-maker":41,"bel":4,"csjs-inject":7,"datdot-terminal":24,"datdot-ui-icon":31,"head":2}],2:[function(require,module,exports){
+},{"..":44,"../src/node_modules/message-maker":47,"bel":4,"csjs-inject":7,"datdot-terminal":24,"datdot-ui-icon":35,"head":2}],2:[function(require,module,exports){
 module.exports = head
 
 function head (lang = 'utf8', title = 'Dropdown - DatDot UI') {
@@ -491,7 +688,7 @@ module.exports = hyperx(belCreateElement, {comments: true})
 module.exports.default = module.exports
 module.exports.createElement = belCreateElement
 
-},{"./appendChild":3,"hyperx":38}],5:[function(require,module,exports){
+},{"./appendChild":3,"hyperx":42}],5:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -510,7 +707,7 @@ function csjsInserter() {
 module.exports = csjsInserter;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"csjs":10,"insert-css":39}],6:[function(require,module,exports){
+},{"csjs":10,"insert-css":43}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = require('csjs/get-css');
@@ -1011,6 +1208,25 @@ function terminal ({to = 'terminal', mode = 'compact', expanded = false}, protoc
 
     function get (msg) {
         const {head, refs, type, data, meta} = msg
+        const from = head[0].split('/')[0].trim()
+        make_logs (msg)
+        if (type === 'layout-mode') return handle_change_layout(data)
+    }
+
+    function handle_change_layout (data) {
+        const {mode, expanded} = data
+        const { childNodes } = log_list
+        if (mode) log_list.setAttribute('aria-label', mode)
+        if (expanded !== void 0) {
+            is_expanded = expanded
+            childNodes.forEach( list => {
+                list.setAttribute('aria-expanded', expanded)
+            })
+        }
+    }
+
+    function make_logs (msg) {
+        const {head, refs, type, data, meta} = msg
         // make an object for type, count, color
         const init = t => ({type: t, count: 0, color: type.match(/ready|click|triggered|opened|closed|checked|unchecked|selected|unselected|expanded|unexpanded|error|warning|toggled|changed/) ? null : int2hsla(str2hashint(t)) })
         // to check type is existing then do count++, else return new type
@@ -1033,9 +1249,7 @@ function terminal ({to = 'terminal', mode = 'compact', expanded = false}, protoc
                 <span class="arrow">=＞</span>
                 ${to}
             </div>`
-            const log = bel`<div class="log">${header}</div>`
-            if (mode === 'compact') log.append(data_info, refs_info)
-            if (mode === 'comfortable') log.append(info)
+            const log = bel`<div class="log">${header}${data_info}${refs_info}</div>`
             const file = bel`
             <div class="file">
                 <span>${meta.stack[0]}</span>
@@ -1050,6 +1264,7 @@ function terminal ({to = 'terminal', mode = 'compact', expanded = false}, protoc
             return false
         }
     }
+
     function generate_type_color (type, el) {
         for (let t in types) { 
             if (t === type && types[t].color) {
@@ -1068,8 +1283,10 @@ const style = `
 :host(i-terminal) {
     --bg-color: var(--color-dark);
     --opacity: 1;
-    font-size: var(--size12);
-    color: #fff;
+    --size: var(--size12);
+    --color: var(--color-white);
+    font-size: var(--size);
+    color: hsl(var(--color));
     background-color: hsla( var(--bg-color), var(--opacity));
     height: 100%;
     overflow: hidden auto;
@@ -1110,23 +1327,29 @@ log-list .list:last-child {
     --bg-color: var(--color-viridian-green);
     --opacity: .3;
 }
-[aria-label="compact"] [aria-expanded="false"] .log {
+[aria-label="compact"] .list[aria-expanded="false"] .log {
     white-space: nowrap;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-[aria-label="compact"] [aria-expanded="false"] .data {
-    display: line-block;
+[aria-label="compact"] .list[aria-expanded="true"] .log {
+    padding-left: 8px;
+    oveflow: auto;
+}
+[aria-label="compact"] .list[aria-expanded="true"] .log .head {
+    margin-left: -8px;
+}
+[aria-label="compact"] .list[aria-expanded="true"] .data {
+    display: inlne-block;
+}
+[aria-label="compact"] .refs {
+    padding-left: 8px;
 }
 .log {
     line-height: 1.8;
     word-break: break-all;
     white-space: pre-wrap;
-}
-.log span {
-    --size: var(--size12);
-    font-size: var(--size);
 }
 .head {
     display: inline-block;
@@ -1176,14 +1399,10 @@ log-list .list:last-child {
     --color: 0, 0%, 70%;
     color: var(--color);
 }
-.data {
-    padding-left: 8px;
-}
 .refs {
     --color: var(--color-white);
     display: inline-block;
     color: var(--color);
-    padding-left: 8px;
 }
 [aria-type="click"] {
     --color: var(--color-dark);
@@ -1261,26 +1480,25 @@ log-list .list:last-child [aria-type="ready"] {
 log-list .list:last-child .function {
     --color: var(--color-white);
 }
-[aria-label="comfortable"] .info {
-    padding: 8px;
+[aria-label="comfortable"] .list[aria-expanded="false"] .log {
+    
 }
-[aria-label="comfortable"] [aria-expanded="false"] .info {
+[aria-label="comfortable"] .data {
+    display: block;
+    padding: 8px 8px 0px 8px;
+}
+[aria-label="comfortable"] .list[aria-expanded="false"] .data {
     white-space: nowrap;
     max-width: 100%;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis; 
 }
-[aria-label="comfortable"] .data {
-    padding: 0 8px 0 0;
+[aria-label="comfortable"] .list[aria-expanded="false"] .refs {
+    display: none;
 }
-[aria-label="comfortable"] .refs {
-    padding-left: 0;
-}
-[aria-label="comfortable"] [aria-expanded="true"] .refs {
-    padding-top: 6px;
-}
-[aria-label="comfortable"] [aria-expanded="true"] .refs span:nth-child(1) {
-    padding-right: 5px;
+[aria-label="comfortable"] .list[aria-expanded="true"] .refs {
+    display: block;
+    padding-left: 8px;
 }
 `
 },{"bel":4,"generator-color":25,"message-maker":26,"support-style-sheet":27}],25:[function(require,module,exports){
@@ -1322,116 +1540,377 @@ function support_style_sheet (root, style) {
 },{}],28:[function(require,module,exports){
 const style_sheet = require('support-style-sheet')
 const message_maker = require('message-maker')
-module.exports = i_button
+const img = require('make-image')
+const make_element = require('make-element')
+const {main_icon, select_icon, list_icon} = require('make-icon')
+const make_grid = require('make-grid')
+
+module.exports = {i_button, i_link}
+
+function i_link (option, protocol) {
+    const {page = '*', flow = 'ui-link', name, role='link', body, link = {}, icons = {}, classlist, cover, disabled = false, theme = {}} = option
+    const { icon } = icons
+    const make_icon = icons && icon ? main_icon(icon) : undefined
+    let {url = '#', target = '_self'} = link
+    let is_disabled = disabled
+
+    function widget () {
+        const send = protocol(get)
+        const make = message_maker(`${name} / ${role} / ${flow} / ${page}`)
+        const message = make({to: 'demo.js', type: 'ready'})
+        const el = make_element({name: 'i-link', role})
+        const shadow = el.attachShadow({mode: 'open'})
+        const text = make_element({name: 'span', classlist: 'text'})
+        const avatar = make_element({name: 'span', classlist: 'avatar'})
+        text.append(body)
+        el.setAttribute('aria-label', body)
+        el.setAttribute('href', url)
+        if (is_disabled) set_attr ({aria: 'disabled', prop: is_disabled})
+        if (!target.match(/self/)) el.setAttribute('target', target)
+        if (classlist) el.classList.add(classlist)
+        style_sheet(shadow, style)
+        // check icon, cover and body if has value
+        const add_cover = typeof cover === 'string' ? avatar : undefined
+        const add_icon = icon ? make_icon : undefined
+        const add_text = body ? typeof body === 'string' && (add_icon || add_cover ) ? text : body : typeof body === 'object' && body.localName === 'div' ? body : undefined
+        if (typeof cover === 'string') avatar.append(img({src: cover, alt: name}))
+        if (typeof cover === 'object') send(make({type: 'error', data: `cover[${typeof cover}] must to be a string`}))
+        if (add_icon) shadow.append(add_icon)
+        if (add_cover) shadow.append(add_cover)
+        if (add_text) shadow.append(add_text)
+        send(message)
+        if (!is_disabled) el.onclick = handle_open_link
+        return el
+
+        function set_attr ({aria, prop}) {
+            el.setAttribute(`aria-${aria}`, prop)
+        }
+    
+        function handle_open_link () {
+            if (target.match(/_/)) {
+                window.open(url, target)
+            }
+            if (target.match(/#/) && target.length > 1) {
+                const el = document.querySelector(target)
+                el.src = url
+            }
+            send(make({type: 'go to', data: {url, window: target}}))
+        }
+
+        // protocol get msg
+        function get (msg) {
+            const { head, refs, type, data } = msg
+        }
+
+    }
+
+    // insert CSS style
+    const custom_style = theme ? theme.style : ''
+    // set CSS variables
+    const {props = {}, grid = {}} = theme
+    const {
+        // default        
+        padding, margin, width, height, opacity,
+        // size
+        size, size_hover, disabled_size,
+        // weight
+        weight, weight_hover, disabled_weight,
+        // color
+        color, color_hover, disabled_color,
+        // background-color    
+        bg_color, bg_color_hover, disabled_bg_color,
+        // deco
+        deco, deco_hover, disabled_deco,
+        // border
+        border_width, border_style, border_opacity, 
+        border_color, border_color_hover, border_radius,
+        // shadowbox
+        shadow_color, shadow_color_hover,
+        offset_x, offset_y, offset_x_hover, offset_y_hover, 
+        blur, blur_hover, shadow_opacity, shadow_opacity_hover,
+        // icon
+        icon_size, icon_size_hover, disabled_icon_size,
+        icon_fill, icon_fill_hover, disabled_icon_fill,
+        // avatar
+        avatar_width, avatar_height, avatar_radius, 
+        avatar_width_hover, avatar_height_hover,
+        scale, scale_hover
+    } = props
+
+    const grid_link = grid.link ? grid.link : {auto: {auto_flow: 'column'}, align: 'items-center', gap: '4px'}
+    const style = `
+    :host(i-link) {
+        --size: ${size ? size : 'var(--link-size)'};
+        --weight: ${weight ? weight : 'var(--weight300)'};
+        --color: ${color ? color : 'var(--link-color)'};
+        --bg-color: ${bg_color ? bg_color : 'var(--link-bg-color)'};
+        --opacity: ${opacity ? opacity : '0'};
+        --deco: ${deco ? deco : 'none'};
+        --padding: ${padding ? padding : '0'};
+        --margin: ${margin ? margin : '0'};
+        --icon-size: ${icon_size ? icon_size : 'var(--link-icon-size)'};
+        display: inline-grid;
+        font-size: var(--size);
+        font-weight: var(--weight);
+        color: hsl(var(--color));
+        background-color: hsla(var(--bg-color), var(--opacity));
+        text-decoration: var(--deco);
+        padding: var(--padding);
+        margin: var(--margin);
+        transition: color .5s, background-color .5s, font-size .5s, font-weight .5s, opacity .5s ease-in-out;
+        cursor: pointer;
+        ${make_grid(grid_link)}
+    }
+    :host(i-link:hover) {
+        --color: ${color_hover ? color_hover : 'var(--link-color-hover)'};
+        --size: ${size_hover ? size_hover : 'var(--link-size-hover)'};
+        --deco: ${deco_hover ? deco_hover : 'underline'};
+        --bg-color: ${bg_color_hover ? bg_color_hover : 'var(--color-white)'};
+        --opacity: ${opacity ? opacity : '0'};
+        text-decoration: var(--deco);
+    }
+    :host(i-link) img {
+        --scale: ${scale ? scale : '1'};
+        width: 100%;
+        height: 100%;
+        transform: scale(var(--scale));
+        transition: transform 0.3s linear;
+        object-fit: cover;
+        border-radius: var(--avatar-radius);
+    }
+    :host(i-link:hover) img {
+        --scale: ${scale_hover ? scale_hover : '1.2'};
+    }
+    :host(i-link) svg {
+        width: 100%;
+        height: auto;
+    }
+    :host(i-link) g {
+        --icon-fill: ${icon_fill ? icon_fill : 'var(--link-icon-fill)'};
+        fill: hsl(var(--icon-fill));
+        transition: fill 0.05s ease-in-out;
+    }
+    :host(i-link:hover) g, :host(i-link:hover) path{
+        --icon-fill: ${icon_fill_hover ? icon_fill_hover : 'var(--link-icon-fill-hover)'};
+    }
+    :host(i-link) .text {
+        ${make_grid(grid.text)}
+    }
+    :host(i-link) .icon {
+        width: var(--icon-size);
+        max-width: 100%;
+        ${make_grid(grid.icon)}
+    }
+    :host(i-link:hover) .icon {
+        --icon-size: ${icon_size_hover ? icon_size_hover : 'var(--link-icon-size)'};
+    }
+    :host(i-link) .avatar {
+        --avatar-width: ${avatar_width ? avatar_width : 'var(--link-avatar-width)'};
+        --avatar-height: ${avatar_height ? avatar_height : 'var(--link-avatar-height)'};
+        --avatar-radius: ${avatar_radius ? avatar_radius : 'var(--link-avatar-radius)'};
+        display: block;
+        width: var(--avatar-width);
+        height: var(--avatar-height);
+        border-radius: var(--avatar-radius);
+        -webkit-mask-image: -webkit-radial-gradient(center, white, black);
+        max-width: 100%;
+        max-height: 100%;
+        ${make_grid(grid.avatar)}
+        transition: width 0.2s, height 0.2s linear;
+    }
+    :host(i-link:hover) .avatar {
+        --avatar-width: ${avatar_width_hover ? avatar_width_hover : 'var(--link-avatar-width-hover)'};
+        --avatar-height: ${avatar_height_hover ? avatar_height_hover : 'var(--link-avatar-height-hover)'};
+    }
+    :host(i-link[role="menuitem"]) {
+        --size: ${size ? size : 'var(--menu-size)'};
+        --color: ${color ? color : 'var(--menu-color)'};
+        --weight: ${weight ? weight : 'var(--menu-weight)'};
+        background-color: transparent;
+    }
+    :host(i-link[role="menuitem"]:hover) {
+        --size: ${size ? size : 'var(--menu-size-hover)'};
+        --color: ${color_hover ? color_hover : 'var(--menu-color-hover)'};
+        --weight: ${weight ? weight : 'var(--menu-weight-hover)'};
+        text-decoration: none;
+        background-color: transparent;
+    }
+    :host(i-link[role="menuitem"]) .icon {
+        --icon-size: ${icon_size ? icon_size : 'var(--menu-icon-size)'};
+    }
+    :host(i-link[role="menuitem"]) g {
+        --icon-fill: ${icon_fill ? icon_fill : 'var(--menu-icon-fill)'};
+    }
+    :host(i-link[role="menuitem"]:hover) g {
+        --icon-fill: ${icon_fill_hover ? icon_fill_hover : 'var(--menu-icon-fill-hover)'};
+    }
+    :host(i-link[aria-disabled="true"]), :host(i-link[aria-disabled="true"]:hover) {
+        --size: ${disabled_size ? disabled_size : 'var(--link-disabled-size)'};
+        --color: ${disabled_color ? disabled_color : 'var(--link-disabled-color)'};
+        text-decoration: none;
+        cursor: not-allowed;
+    }
+    :host(i-link[disabled]) g,
+    :host(i-link[disabled]) path,
+    :host(i-link[disabled]:hover) g,
+    :host(i-link[disabled]:hover) path,
+    :host(i-link[role][disabled]) g,
+    :host(i-link[role][disabled]) path,
+    :host(i-link[role][disabled]:hover) g,
+    :host(i-link[role][disabled]:hover) path
+    {
+        --icon-fill: ${disabled_icon_fill ? disabled_icon_fill : 'var(--link-disabled-icon-fill)'};
+    }
+    :host(i-link[disabled]) .avatar {
+        opacity: 0.6;
+    }
+    :host(i-link.right) {
+        flex-direction: row-reverse;
+    }
+    ${custom_style}
+    `
+    return widget()
+}
 
 function i_button (option, protocol) {
-    const {page, flow = 'ui-button', name, body, icon = '', role = 'button', mode = '', state, expanded = false, current = false, selected = false, checked = false, disabled = false, theme} = option
+    const {page = "*", flow = 'ui-button', name, role = 'button', controls, body = '', icons = {}, cover, classlist = null, mode = '', state, expanded = false, current = false, selected = false, checked = false, disabled = false, theme = {}} = option
+    const {icon, select = {}, list = {}} = icons
+    const make_icon = icon ? main_icon(icon) : undefined
+    if (role === 'listbox') var make_select_icon = select_icon(select)
+    if (role === 'option') var make_list_icon = list_icon(list)
     let is_current = current
     let is_checked = checked
     let is_disabled = disabled
     let is_selected = selected
     let is_expanded = expanded
 
+    document.body.addEventListener("touchstart",function(){ });
+
     function widget () {
         const send = protocol(get)
-        const make = message_maker(`${name} / ${role} / ${flow}`)
-        let data = role === 'tab' ?  {selected: is_current ? 'true' : is_selected, current: is_current} : role === 'switch' ? {checked: is_checked} : role === 'listbox' ? {expanded: is_expanded} : disabled ? {disabled} : role === 'option' ? {selected: is_selected, current: is_current} : null
+        const make = message_maker(`${name} / ${role} / ${flow} / ${page}`)
+        const data = role === 'tab' ?  {selected: is_current ? 'true' : is_selected, current: is_current} : role === 'switch' ? {checked: is_checked} : role === 'listbox' ? {expanded: is_expanded} : disabled ? {disabled} : role === 'option' ? {selected: is_selected, current: is_current} : null
         const message = make({to: 'demo.js', type: 'ready', data})
         send(message)
-        const el = document.createElement('i-button')
-        const text = document.createElement('span')
-        if (body != void 0) {
-            text.classList.add('text')
-            text.append(body)
-        }
-        el.dataset.name = name
-        el.dataset.ui = role
-        el.setAttribute('role', role)
-        el.setAttribute('aria-label', name)
-        el.setAttribute('tabindex', 0)
-        el.onclick = handle_click
+        const el = make_element({name: 'i-button', classlist, role })
         const shadow = el.attachShadow({mode: 'open'})
+        const text = make_element({name: 'span', classlist: 'text'})
+        const avatar = make_element({name: 'span', classlist: 'avatar'})
+        const listbox = make_element({name: 'span', classlist: 'listbox'})
+        const option = make_element({name: 'span', classlist: 'option'})
+        // check icon, img and body if has value
+        const add_cover = typeof cover === 'string' ? avatar : undefined
+        const add_text = body && typeof body === 'string' ? text : body
+        if (typeof cover === 'string') avatar.append(img({src: cover, alt: name}))
+        if (typeof cover === 'object') send(make({type: 'error', data: `cover[${typeof cover}] must to be a string`}))
+        if (typeof body === 'object' && body.localName !== 'div') send(make({type: 'error', data: {body: `content is an ${typeof body}`, content: body }}))
+        if (!is_disabled) el.onclick = handle_click
+        el.setAttribute('aria-label', name)
+        text.append(body)
         style_sheet(shadow, style)
-        if (icon || role.match(/option|listbox/) ) {
-            if (icon === '') shadow.append(body)
-            if (body === undefined) shadow.append(icon)
-            if (icon !== '' && body) shadow.append(icon, text)
-        }else shadow.append(body)
-
-        // define conditions
-        if (state) {
-            el.dataset.state = state
-            el.setAttribute('aria-live', 'assertive')
-        }
-        if (role === 'tab') {
-            el.dataset.current = is_current
-            el.setAttribute('aria-selected', false)
-        }
-        if (role === 'switch') {
-            el.setAttribute('aria-checked', is_checked)
-        }
-        if (role === 'listbox') {
-            el.setAttribute('aria-haspopup', role)
-        }
-        if (disabled) {
-            el.setAttribute('aria-disabled', is_disabled)
-            el.setAttribute('disabled', is_disabled)
-        } else {
-            el.removeAttribute('aria-disabled')
-            el.removeAttribute('disabled')
-        }
-        if (is_checked) {
-            el.setAttribute('aria-checked', is_checked)
-        }
-        if (current) {
-            is_selected = current
-            el.setAttribute('aria-current', is_current)
-        }
-        if (is_selected || !is_selected && role.match(/option/)) {
-            el.setAttribute('aria-selected', is_selected)
-        } 
-        if (is_expanded) {
-            el.setAttribute('aria-expanded', is_expanded)
-        }
+        append_items()
+        init_attr()
         return el
+
+        function init_attr () {
+            // define conditions
+            if (state) set_attr({aria: 'aria-live', prop: 'assertive'})
+            if (role === 'tab') {
+                set_attr({aria: 'selected', prop: is_selected})
+                set_attr({aria: 'controls', prop: controls})
+                el.setAttribute('tabindex', is_current ? 0 : -1)
+            }
+            if (role === 'switch') set_attr({aria: 'checked', prop: is_checked})
+            if (role === 'listbox') {
+                set_attr({aria: 'haspopup', prop: role})
+            }
+            if (disabled) {
+                set_attr({aria: 'disabled', prop: is_disabled})
+                el.setAttribute('disabled', is_disabled)
+            } 
+            if (is_checked) set_attr({aria: 'checked', prop: is_checked})
+            if (is_current) {
+                is_selected = is_current
+                set_attr({aria: 'current', prop: is_current})
+            }
+            if (is_selected || !is_selected && role.match(/option/)) {
+                set_attr({aria: 'selected', prop: is_selected})
+            } 
+            if (is_expanded) {
+                set_attr({aria: 'selected', prop: is_expanded})
+            }
+        }
+
+        function set_attr ({aria, prop}) {
+            el.setAttribute(`aria-${aria}`, prop)
+        }
+
+        // make element to append into shadowDOM
+        function append_items() {
+            const items = [make_icon, add_cover, add_text]
+            
+            if (!role.match(/listbox/)) {
+                const target = role === 'listbox' ? listbox : role === 'option' ?  option : shadow
+                items.forEach( item => {
+                    if (item === undefined) return
+                    target.append(item)
+                })
+            }
+            // list of listbox or dropdown menu
+            if (role.match(/option/)) shadow.append(make_list_icon, option)
+
+            // listbox or dropdown button
+            if (role.match(/listbox/)) {
+                if (make_icon || add_cover) {
+                    if (make_icon) option.append(make_icon)
+                    if (add_cover) option.append(add_cover)
+                    option.append(add_text)
+                    listbox.append(option)
+                }
+                if (make_icon == undefined && add_cover == undefined) listbox.append(add_text)
+                shadow.append(make_select_icon, listbox)
+            }
+        }
 
         // toggle
         function switched_event (data) {
             is_checked = data
             if (!is_checked) return el.removeAttribute('aria-checked')
-            el.setAttribute('aria-checked', is_checked)
+            set_attr({aria: 'checked', prop: is_checked})
         }
         // dropdown menu
         function expanded_event (data) {
             is_expanded = !data
-            el.setAttribute('aria-expanded', is_expanded)
+            set_attr({aria: 'expanded', prop: is_expanded})
         }
         // tab checked
         function checked_event (data) {
             is_checked = data
             is_current = is_checked
-            el.setAttribute('aria-selected', is_checked)
-            el.setAttribute('aria-current', is_checked)
-            el.dataset.current = is_current
+            set_attr({aria: 'selected', prop: is_checked})
+            set_attr({aria: 'current', prop: is_current})
+            el.setAttribute('tabindex', is_current ? 0 : -1)
         }
-        function selected_event (body) {
-            is_selected = body
-            el.setAttribute('aria-selected', is_selected)
+        function list_selected_event (state) {
+            const content = {body: option.cloneNode(true)}
+            is_selected = state
+            set_attr({aria: 'selected', prop: is_selected})
             if (mode === 'single-select') {
-                is_current = body
-                el.setAttribute('aria-current', is_current)
+                is_current = is_selected
+                set_attr({aria: 'current', prop: is_current})
             }
+            // option is selected then send selected items to listbox button
+            if (is_selected) send(make({to: 'listbox', type: 'changed', data: content }))
         }
-        function changed_event (body) {
-            const { childNodes } = shadow
-            const lists = shadow.firstChild.tagName !== 'STYLE' ? childNodes : [...childNodes].filter( (child, index) => index !== 0)
-            const [icon, text] = lists
-            if (text) {
-                text.textContent = body
-            } else {
-                shadow.childNodes[0].textContent = body
-                el.ariaLabel = body
+
+        function changed_event (data) {
+            if (role === 'listbox') {
+                const { body } = data
+                listbox.innerHTML = ''
+                listbox.append(body)
+                return
             }
+            if (role.match(/button|tab|switch/)) text.textContent = data
         }
         // button click
         function handle_click () {
@@ -1443,267 +1922,569 @@ function i_button (option, protocol) {
                 is_expanded = !is_expanded
                 return send( make({type, data: {expanded: is_expanded}}) )
             }
-            if (role === 'option') return send( make({type, data: is_selected}) )
+            if (role === 'option') {
+                is_selected = !is_selected
+                return send( make({type, data: {selected: is_selected }}) )
+            }
             send( make({type}) )
         }
         // protocol get msg
         function get (msg) {
             const { head, refs, type, data } = msg
             // toggle
-            if (type === 'switched') return switched_event(data)
+            if (type.match(/switched/)) return switched_event(data)
             // dropdown
-            if (type.match(/expanded|unexpanded/)) return expanded_event(!data)
+            if (type.match(/expanded|collapse/)) return expanded_event(!data)
             // tab, checkbox
             if (type.match(/checked|unchecked/)) return checked_event(data)
             // option
-            if (type.match(/selected|unselected/)) return selected_event(data)
-            if (type === 'changed') return changed_event(data)
+            if (type.match(/selected|unselected/)) return list_selected_event(data)
+            if (type.match(/changed/)) return changed_event(data)
         }
     }
    
     // insert CSS style
     const custom_style = theme ? theme.style : ''
     // set CSS variables
-    if (theme && theme.props) {
-        var {size, size_hover, current_size,
-            weight, weight_hover, current_weight, current_hover_weight,
-            color, color_hover, current_color, current_bg_color, 
-            current_hover_color, current_hover_bg_color,
-            bg_color, bg_color_hover, border_color_hover,
-            border_width, border_style, border_opacity, border_color, border_radius, 
-            padding, width, height, opacity,
-            fill, fill_hover, fill_opacity, icon_size, current_fill, current_hover_fill,
-            shadow_color, offset_x, offset_y, blur, shadow_opacity,
-            shadow_color_hover, offset_x_hover, offset_y_hover, blur_hover, shadow_opacity_hover
-        } = theme.props
-    }
+    const {props = {}, grid = {}} = theme
+    const {
+        // default -----------------------------------------//
+        padding, margin, width, height, opacity, 
+        // size
+        size, size_hover, 
+        // weight
+        weight, weight_hover, 
+        // color
+        color, color_hover,
+        // background-color
+        bg_color, bg_color_hover,
+        // border
+        border_color, border_color_hover,
+        border_width, border_style, border_opacity, border_radius, 
+        // icon
+        icon_fill, icon_fill_hover, icon_size, icon_size_hover,
+        // avatar
+        avatar_width, avatar_height, avatar_radius,
+        avatar_width_hover, avatar_height_hover,
+        // shadow
+        shadow_color, shadow_color_hover, 
+        offset_x, offset_x_hover,
+        offset_y, offset_y_hover, 
+        blur, blur_hover,
+        shadow_opacity, shadow_opacity_hover,
+        // scale
+        scale, scale_hover,
+        // current -----------------------------------------//
+        current_size, 
+        current_weight, 
+        current_color, 
+        current_bg_color,
+        current_icon_size,
+        current_icon_fill,
+        current_list_selected_icon_size,
+        current_list_selected_icon_fill,
+        current_avatar_width, 
+        current_avatar_height,
+        // disabled -----------------------------------------//
+        disabled_size, disabled_weight, disabled_color,
+        disabled_bg_color, disabled_icon_fill, disabled_icon_size,
+        // role === option ----------------------------------//
+        list_selected_icon_size, list_selected_icon_size_hover,
+        list_selected_icon_fill, list_selected_icon_fill_hover,
+        // role === listbox ----------------------------------//
+        // collapse settings
+        listbox_collapse_icon_size, listbox_collapse_icon_fill, listbox_collapse_icon_fill_hover, 
+        listbox_collapse_option_color, listbox_collapse_option_color_hover,
+        listbox_collapse_option_size, listbox_collapse_option_size_hover,
+        listbox_collapse_option_weight, listbox_collapse_option_weight_hover,
+        listbox_collapse_option_icon_size, listbox_collapse_option_icon_size_hover,
+        listbox_collapse_option_avatar_width, listbox_collapse_option_avatar_height,
+        // expanded settings
+        listbox_expanded_option_color, listbox_expanded_option_color_hover,
+        listbox_expanded_option_size, listbox_expanded_option_size_hover,
+        listbox_expanded_option_weight, listbox_expanded_option_weight_hover,
+        listbox_expanded_icon_size, listbox_expanded_icon_fill, listbox_expanded_icon_fill_hover,
+        listbox_expanded_option_avatar_width, listbox_expanded_option_avatar_height,
+        listbox_expanded_option_icon_size, listbox_expanded_option_icon_size_hover,
+        listbox_expanded_option_icon_fill, listbox_expanded_option_icon_fill_hover
+    } = props
+
+    const grid_option = grid.option ? grid.option : {auto: {auto_flow: 'column'}, align: 'items-center', gap: '5px', justify: 'items-center'}
 
     const style = `
     :host(i-button) {
-        --size: ${size ? size : 'var(--size14)'};
-        --size-hover: ${size_hover ? size_hover : 'var(--size)'};
-        --current-size: ${current_size ? current_size : 'var(--size14)'};
-        --bold: ${weight ? weight : 'normal'};
+        --size: ${size ? size : 'var(--primary-size)'};
+        --weight: ${weight ? weight : 'var(--weight300)'};
         --color: ${color ? color : 'var(--primary-color)'};
-        --bg-color: ${bg_color ? bg_color : 'var(--color-white)'};
-        --width: ${width ? width : 'unset'};
-        --height: ${height ? height : 'unset'};
+        --bg-color: ${bg_color ? bg_color : 'var(--primary-bg-color)'};
+        ${width && `--width: ${width}`};
+        ${height && `--height: ${height}`};
         --opacity: ${opacity ? opacity : '1'};
         --padding: ${padding ? padding : '12px'};
+        --margin: ${margin ? margin : '0'};
         --border-width: ${border_width ? border_width : '0px'};
         --border-style: ${border_style ? border_style : 'solid'};
         --border-color: ${border_color ? border_color : 'var(--primary-color)'};
         --border-opacity: ${border_opacity ? border_opacity : '1'};
         --border: var(--border-width) var(--border-style) hsla( var(--border-color), var(--border-opacity) );
-        --border-radius: ${border_radius ? border_radius : 'var(--primary-button-radius)'};
-        --fill: ${fill ? fill : 'var(--primary-color)'};
-        --fill-hover: ${fill_hover ? fill_hover : 'var(--color-white)'};
-        --icon-size: ${icon_size ? icon_size : '16px'};
+        --border-radius: ${border_radius ? border_radius : 'var(--primary-radius)'};
         --offset_x: ${offset_x ? offset_x : '0px'};
         --offset-y: ${offset_y ? offset_y : '6px'};
         --blur: ${blur ? blur : '30px'};
-        --shadow-color: ${shadow_color ? shadow_color : 'var(--pimary-color)'};
-        --shadow-opacity: ${shadow_opacity ? shadow_opacity : '1'};
+        --shadow-color: ${shadow_color ? shadow_color : 'var(--primary-color)'};
+        --shadow-opacity: ${shadow_opacity ? shadow_opacity : '0'};
         --box-shadow: var(--offset_x) var(--offset-y) var(--blur) hsla( var(--shadow-color), var(--shadow-opacity) );
+        --avatar-width: ${avatar_width ? avatar_width : 'var(--primary-avatar-width)'};
+        --avatar-height: ${avatar_height ? avatar_height : 'var(--primary-avatar-height)'};
+        --avatar-radius: ${avatar_radius ? avatar_radius : 'var(--primary-avatar-radius)'};
         display: inline-grid;
-        grid-auto-flow: column;
-        grid-column-gap: 5px;
-        justify-content: center;
-        align-items: center;
-        ${width && 'width: var(--width)'};
-        ${height && 'height: var(--height)'};
+        ${grid.button ? make_grid(grid.button) : make_grid({auto: {auto_flow: 'column'}, gap: '5px', justify: 'content-center', align: 'items-center'})}
+        ${width && 'width: var(--width);'};
+        ${height && 'height: var(--height);'};
+        max-width: 100%;
         font-size: var(--size);
-        font-weight: var(--bold);
+        font-weight: var(--weight);
         color: hsl( var(--color) );
         background-color: hsla( var(--bg-color), var(--opacity) );
         border: var(--border);
         border-radius: var(--border-radius);
         box-shadow: var(--box-shadow);
         padding: var(--padding);
-        transition: font-size .3s, color .3s, background-color .3s ease-in-out;
+        transition: font-size .3s, font-weight .15s, color .3s, background-color .3s, opacity .3s, border .3s, box-shadow .3s ease-in-out;
         cursor: pointer;
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
     }
-    :host(i-button:hover), :host(i-button[role]:hover) {
-        --weight: ${weight_hover ? weight_hover : 'initial'};
-        --color: ${color_hover ? color_hover : 'var(--color-white)'};
-        --bg-color: ${bg_color_hover ? bg_color_hover : 'var(--primary-color)'};
-        --border-color: ${border_color_hover ? border_color_hover : 'var(--primary-color)'};
+    :host(i-button:hover) {
+        --size: ${size_hover ? size_hover : 'var(--primary-size-hover)'};
+        --weight: ${weight_hover ? weight_hover : 'var(--primary-weight-hover)'};
+        --color: ${color_hover ? color_hover : 'var(--primary-color-hover)'};
+        --bg-color: ${bg_color_hover ? bg_color_hover : 'var(--primary-bg-color-hover)'};
+        --border-color: ${border_color_hover ? border_color_hover : 'var(--primary-color-hover)'};
         --offset-x: ${offset_x_hover ? offset_x_hover : '0'};
         --offset-y: ${offset_y_hover ? offset_y_hover : '0'};
         --blur: ${blur_hover ? blur_hover : '50px'};
-        --shadow-color: ${shadow_color_hover ? shadow_color_hover : 'var(--pimary-color)'};
-        --shadow-opacity: ${shadow_opacity_hover ? shadow_opacity_hover : '.25'};
-        font-size: var(--size-hover);
+        --shadow-color: ${shadow_color_hover ? shadow_color_hover : 'var(--primary-color-hover)'};
+        --shadow-opacity: ${shadow_opacity_hover ? shadow_opacity_hover : '0'};
+    }
+    :host(i-button:hover:foucs:active) {
+        --bg-color: ${bg_color ? bg_color : 'var(--primary-bg-color)'};
     }
     :host(i-button) g {
-        fill: hsl(var(--fill));
-        transition: fill 0.3s ease-in-out;
+        --icon-fill: ${icon_fill ? icon_fill : 'var(--primary-icon-fill)'};
+        fill: hsl(var(--icon-fill));
+        transition: fill 0.05s ease-in-out;
     }
     :host(i-button:hover) g {
-        --fill-hover: ${fill_hover ? fill_hover : 'var(--color-white)'};
-        fill: hsl(var(--fill-hover));
-    }
-    :host(i-button[role="button"])  {
-
+        --icon-fill: ${icon_fill_hover ? icon_fill_hover : 'var(--primary-icon-fill-hover)'};
     }
     :host(i-button) .col2 {
-        display: grid;
-        grid-auto-flow: column;
-        justify-content: center;
-        align-items: center;
+        display: flex;
+        flex-direction: row;
         column-gap: 8px;
-    }
-    :host(i-button) .icon {
-        display: grid;
         justify-content: center;
         align-items: center;
-        width: var(--icon-size);
-        height: var(---con-size);
     }
-    :host(i-button) .right .icon {
-        grid-column-start: 2;
+    :host(i-button) .avatar {
+        display: block;
+        width: var(--avatar-width);
+        height: var(--avatar-height);
+        max-width: 100%;
+        border-radius: var(--avatar-radius);
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
+        overflow: hidden;
+        transition: width .3s, height .3s ease-in-out;
+        ${make_grid(grid.avatar)}
     }
-    :host(i-button) .left .icon {
-        grid-column-start: 1;
+    :host(i-button) img {
+        --scale: ${scale ? scale : '1'};
+        width: 100%;
+        height: 100%;
+        transform: scale(var(--scale));
+        transition: transform 0.3s, scale 0.3s linear;
+        object-fit: cover;
+        border-radius: var(--avatar-radius);
+    }
+    :host(i-button:hover) img {
+        --scale: ${scale_hover ? scale_hover : '1.2'};
+        transform: scale(var(--scale));
     }
     :host(i-button) svg {
-        max-width: 100%;
         width: 100%;
         height: auto;
     }
-    :host(i-button[role="tab"])  {
-        --size: ${size ? size : 'initial'};
+    :host(i-button[role="tab"]) {
         --width: ${width ? width : '100%'};
-        --color: ${color ? color : 'var(--primary-color)'};
-        --bg-color: ${bg_color ? bg_color : 'var(--color-white)'};
         --border-radius: ${border_radius ? border_radius : '0'};
-        --border-width: ${border_width ? border_width : '0'};
-        --border-style: ${border_style ? border_style : 'solid'};
-        --border-color: ${border_color ? border_color : 'var(--primary-color)'};
-        width: var(--width);
     }
     :host(i-button[role="switch"]) {
-        --width: ${width ? width : 'unset'};
-        --color: ${color ? color : 'var(--primary-color)'};
-        --bg-color: ${bg_color ? bg_color : 'var(--color-white)'};
-        --border-radius: ${border_radius ? border_radius : '8px'};
-        --border-width: ${border_width ? border_width : '0'};
-        --border-style: ${border_style ? border_style : 'solid'};
-        --border-color: ${border_color ? border_color : 'var(--primary-color)'};
-        width: var(--width);
+        --size: ${size ? size : 'var(--primary-size)'};
+    }
+    :host(i-button[role="switch"]:hover) {
+        --size: ${size_hover ? size_hover : 'var(--primary-size-hover)'};
     }
     :host(i-button[role="listbox"]) {
-        --width: ${width ? width : 'unset'};
-        --color: ${color ? color : 'var(--primary-color)'};
-        --bg-color: ${bg_color ? bg_color : 'var(--color-white)'};
-        --border-radius: ${border_radius ? border_radius : '8px'};
-        --border-width: ${border_width ? border_width : '0'};
-        --border-style: ${border_style ? border_style : 'solid'};
-        --border-color: ${border_color ? border_color : 'var(--primary-color)'};
-        display: grid;
-        grid-template-columns: ${body && icon !== '' ? '1fr auto' : 'auto'};
-        width: var(--width);
+        --color: ${listbox_collapse_option_color ? listbox_collapse_option_color : 'var(--listbox-collapse-option-color)'};
+        --size: ${listbox_collapse_option_size ? listbox_collapse_option_size : 'var(--listbox-collapse-option-size)'};
+        --weight: ${listbox_collapse_option_weight ? listbox_collapse_option_weight : 'var(--listbox-collapse-option-weight)'};
     }
-    :host(i-button[role="listbox"]) .text {
-        grid-column-start: 1;
-        text-align: left;
+    :host(i-button[role="listbox"]:hover) {
+        --color: ${listbox_collapse_option_color_hover ? listbox_collapse_option_color_hover : 'var(--listbox-collapse-option-color-hover)'};
+        --size: ${listbox_collapse_option_size_hover ? listbox_collapse_option_size_hover : 'var(--listbox-collapse-option-size-hover)'};
+        --weight: ${listbox_collapse_option_weight_hover ? listbox_collapse_option_weight_hover : 'var(--listbox-collapse-option-weight-hover)'};
     }
-    :host(i-button[role="listbox"]) .icon {
-        ${body && icon !== '' ? 'grid-column-start: 2;' : ''}
+    :host(i-button[role="listbox"]) > .icon {
+        ${grid.icon ? make_grid(grid.icon) : make_grid({column: '2'})}
+    }
+    :host(i-button[role="listbox"]) .text {}
+    :host(i-button[role="listbox"]) .avatar {
+        --avatar-width: ${listbox_collapse_option_avatar_width ? listbox_collapse_option_avatar_width : 'var(--listbox-collapse-option-avatar-width)'};
+        --avatar-height: ${listbox_collapse_option_avatar_height ? listbox_collapse_option_avatar_height : 'var(--listbox-collapse-option-avatar-height)'}
+    }
+    :host(i-button[role="listbox"][aria-expanded="true"]),
+    :host(i-button[role="listbox"][aria-expanded="true"]:hover) {
+        --size: ${listbox_expanded_option_size ? listbox_expanded_option_size : 'var(--listbox-expanded-option-size)' };
+        --color: ${listbox_expanded_option_color ? listbox_expanded_option_color : 'var(--listbox-expanded-option-color)' };
+        --weight: ${listbox_expanded_option_weight ? listbox_expanded_option_weight : 'var(--listbox-expanded-option-weight)' };
+    }
+    :host(i-button[role="listbox"][aria-expanded="true"]) .avatar {
+        --avatar-width: ${listbox_expanded_option_avatar_width ? listbox_expanded_option_avatar_width : 'var(--listbox-expanded-option-avatar-width)'};
+        --avatar-height: ${listbox_expanded_option_avatar_height ? listbox_expanded_option_avatar_height : 'var(--listbox-expanded-option-avatar-height)'};
     }
     :host(i-button[role="option"]) {
-        display: grid;
-        grid-template-rows: 24px;
-        grid-template-columns: 20px auto;
-        justify-content: left;
+        --border-radius: ${border_radius ? border_radius : '0'};
+        --opacity: ${opacity ? opacity : '0'};
     }
-    :host(i-button[role="option"]) .text {
-        display: block;
-        grid-column-start: 2;
+    :host(i-button[role="option"][aria-current="true"]), :host(i-button[role="option"][aria-current="true"]:hover) {
+        --size: ${current_size ? current_size : 'var(--current-list-size)'};
+        --color: ${current_color ? current_color : 'var(--current-list-color)'};
+        --bg-color: ${current_bg_color ? current_bg_color : 'var(--current-list-bg-color)'};
+        --opacity: ${opacity ? opacity : '0'}
     }
-    :host(i-button[role="option"]:hover) g {
-        --fill-hover: ${fill_hover ? fill_hover : 'var(--primary-color)'};
+    :host(i-button[role="option"][disabled]), :host(i-button[role="option"][disabled]:hover) {
+        --size: ${disabled_size ? disabled_size : 'var(--primary-disabled-size)'};
+        --color: ${disabled_color ? disabled_color : 'var(--primary-disabled-color)'};
+        --bg-color: ${disabled_bg_color ? disabled_bg_color : 'var(--primary-disabled-bg-color)'};
+        --opacity: ${opacity ? opacity : '0'}
     }
-    :host(i-button[aria-current="true"]:hover) g {
-        --fill-hover: ${fill_hover ? fill_hover : 'var(--color-white)'};
+    
+    :host(i-button[aria-disabled="true"]) .icon, 
+    :host(i-button[aria-disabled="true"]:hover) .icon,
+    :host(i-button[role="option"][aria-disabled="true"]) .icon, 
+    :host(i-button[role="option"][aria-disabled="true"]:hover) .icon,
+    :host(i-button[role="listbox"][aria-disabled="true"]) .icon, 
+    :host(i-button[role="listbox"][aria-disabled="true"]:hover) .icon {
+        --icon-size: ${disabled_icon_size ? disabled_icon_size : 'var(--primary-disabled-icon-size)'};
     }
-    :host(i-button[role="option"][aria-selected="false"]) .icon {
-        display: none;
+    :host(i-button[disabled]:hover) img {
+        transform: scale(1);
     }
     :host(i-button[aria-current="true"]), :host(i-button[aria-current="true"]:hover) {
-        --bold: ${current_weight ? current_weight : 'initial'};
-        --color: ${current_color ? current_color : 'var(--color-white)'};
-        --bg-color: ${current_bg_color ? current_bg_color : 'var(--primary-color)'};
-        font-size: var(--current-size);
+        --size: ${current_size ? current_size : 'var(--current-size)'};
+        --weight: ${current_weight ? current_weight : 'var(--current-weight)'};
+        --color: ${current_color ? current_color : 'var(--current-color)'};
+        --bg-color: ${current_bg_color ? current_bg_color : 'var(--current-bg-color)'};
     }
-    :host(i-button[aria-current="true"]) g {
-        --fill: ${fill ? fill : 'var(--color-white)'};
+    :host(i-button[role="option"][aria-current="true"][aria-selected="true"]) .option > .icon, 
+    :host(i-button[role="option"][aria-current="true"][aria-selected="true"]:hover) .option > .icon {
+        --icon-size: ${current_icon_size ? current_icon_size : 'var(--current-icon-size)'};
+    }
+    :host(i-button[role="option"][aria-current="true"][aria-selected="true"]) .option > .icon g,
+    :host(i-button[role="option"][aria-current="true"][aria-selected="true"]:hover) .option > .icon g {
+        --icon-fill: ${current_icon_fill ? current_icon_fill : 'var(--current-icon-fill)'};
     }
     :host(i-button[aria-checked="true"]), :host(i-button[aria-expanded="true"]),
-    :host(i-button[aria-checked="true"]:hover) {
-        --bold: ${current_weight ? current_weight : 'initial'};
-        --color: ${current_color ? current_color : 'var(--color-white)'};
-        --bg-color: ${current_bg_color ? current_bg_color : 'var(--primary-color)'};
+    :host(i-button[aria-checked="true"]:hover), :host(i-button[aria-expanded="true"]:hover) {
+        --size: ${current_size ? current_size : 'var(--current-size)'};
+        --weight: ${current_weight ? current_weight : 'var(--current-weight)'};
+        --color: ${current_color ? current_color : 'var(--current-color)'};
+        --bg-color: ${current_bg_color ? current_bg_color : 'var(--current-bg-color)'};
     }
-    :host(i-button[aria-expanded="true"]:hover) {
-        --bold: ${current_hover_weight ? current_hover_weight : 'initial'};
-        --color: ${current_hover_color ? current_hover_color : 'var(--color-white)'};
-        --bg-color: ${current_hover_bg_color ? current_hover_bg_color : 'var(--primary-color)'};
+    :host(i-button[role="listbox"]) > .icon,
+    :host(i-button[role="listbox"]:hover) > .icon {
+        --icon-size: ${listbox_collapse_icon_size ? listbox_collapse_icon_size : 'var(--listbox-collapse-icon-size)'};
     }
-    :host(i-button[aria-expanded="true"]) g {
-        --fill: ${current_fill ? current_fill : 'var(--color-white)'};
+    :host(i-button[role="listbox"]) .option > .icon {
+        --icon-size: ${listbox_collapse_option_icon_size ? listbox_collapse_option_icon_size : 'var(--listbox-collapse-option-icon-size)'};
     }
-    :host(i-button[aria-expanded="true"]:hover) g {
-        --fill: ${current_hover_fill ? current_hover_fill : 'var(--color-white)'};
+    :host(i-button[role="listbox"]:hover) .option > .icon {
+        --icon-size: ${listbox_collapse_option_icon_size_hover ? listbox_collapse_option_icon_size_hover : 'var(--listbox-collapse-option-icon-size-hover)'};
     }
-    :host(i-button[aria-checked="true"]) g {
-        --fill: ${current_fill ? current_fill : 'var(--color-white)' };
+    :host(i-button[role="listbox"]) > .icon g {
+        --icon-fill: ${listbox_collapse_icon_fill ? listbox_collapse_icon_fill : 'var(--listbox-collapse-icon-fill)'};
+    }
+    :host(i-button[role="listbox"]:hover) > .icon g {
+        --icon-fill: ${listbox_collapse_icon_fill_hover ? listbox_collapse_icon_fill_hover : 'var(--listbox-collapse-icon-fill-hover)'};
+    }
+    :host(i-button[role="listbox"][aria-expanded="true"]) > .icon,
+    :host(i-button[role="listbox"][aria-expanded="true"]:hover) > .icon {
+        --icon-size: ${listbox_expanded_icon_size ? listbox_expanded_icon_size : 'var(--listbox-expanded-icon-size)'};
+    }
+    :host(i-button[role="listbox"][aria-expanded="true"]) > .icon g,
+    :host(i-button[role="listbox"][aria-expanded="true"]:hover) > .icon g {
+        --icon-fill: ${listbox_expanded_icon_fill ? listbox_expanded_icon_fill : 'var(--listbox-expanded-icon-fill)'}
+    }
+    :host(i-button[role="listbox"][aria-expanded="true"]) .option > .icon {
+        --icon-fill: ${listbox_expanded_option_icon_size ? listbox_expanded_option_icon_size : 'var(--listbox-expanded-option-icon-size)'};
+    }
+    :host(i-button[role="listbox"][aria-expanded="true"]:hover) .option > .icon {
+        --icon-fill: ${listbox_expanded_option_icon_size_hover ? listbox_expanded_option_icon_size_hover : 'var(--listbox-expanded-option-icon-size-hover)'};
+    }
+    :host(i-button[role="listbox"][aria-expanded="true"]) .option > .icon g {
+        --icon-fill: ${listbox_expanded_option_icon_fill ? listbox_expanded_option_icon_fill : 'var(--listbox-expanded-option-icon-fill)'};
+    }
+    :host(i-button[role="listbox"][aria-expanded="true"]:hover) .option > .icon g {
+        --icon-fill: ${listbox_expanded_option_icon_fill_hover ? listbox_expanded_option_icon_fill_hover : 'var(--listbox-expanded-option-icon-fill-hover)'};
+    }
+    :host(i-button[role="listbox"][aria-expanded="true"]:hover) > .icon g {
+        --icon-fill: ${listbox_expanded_icon_fill_hover ? listbox_expanded_icon_fill_hover : 'var(--listbox-expanded-icon-fill-hover)'};
+    }
+    :host(i-button[aria-checked="true"]) > .icon g {
+        --icon-fill: ${current_icon_fill ? current_icon_fill : 'var(--color-white)' };
     }
     :host(i-button[disabled]), :host(i-button[disabled]:hover) {
-        --color: ${color ? color : 'var(--color-dark)'};
-        --bg-color: ${bg_color ? bg_color : 'var(--color-white)'};
-        --color-opacity: .6;
-        --bg-color-opacity: .3;
-        --border-width: ${border_width ? border_width : '0'};
-        --border-style: ${border_style ? border_style : 'solid'};
-        --border-color: ${border_color ? border_color : 'var(--color)'};
-        --border-opacity: .6;
-        --border: var(--border-width) var(--border-style) hsla(var(--border-color), var(--border-opacity)); 
-        color: hsla(var(--color), var(--color-opacity));
-        background-color: hsla(var(--bg-color), var(--bg-color-opacity));
-        border: var(--border);
-        pointer-events: none;
+        --size: ${disabled_size ? disabled_size : 'var(--primary-disabled-size)'};
+        --color: ${disabled_color ? disabled_color : 'var(--primary-disabled-color)'};
+        --bg-color: ${disabled_bg_color ? disabled_bg_color : 'var(--primary-disabled-bg-color)'};
         cursor: not-allowed;
     }
-    :host(i-button[role="listbox"][disabled]) {
-        --color: ${color ? color : 'var(--color-dark)'};
-        --bg-color: ${bg_color ? bg_color : 'var(--color-greyCB)'};
-        --color-opacity: .6;
-        --bg-color-opacity: .4;
-        --border-width: ${border_width ? border_width : '1px'};
-        --border-style: ${border_style ? border_style : 'solid'};
-        --border-color: ${border_color ? border_color : 'var(--color)'};
-        --border-opacity: .4;
-        --border: var(--border-width) var(--border-style) hsla(var(--border-color), var(--border-opacity)); 
-        color: hsla(var(--color), var(--color-opacity));
-        background-color: hsla(var(--bg-color), var(--bg-color-opacity));
-        border: var(--border);
+    :host(i-button[disabled]) g, 
+    :host(i-button[disabled]:hover) g, 
+    :host(i-button[role="option"][disabled]) > .icon g, 
+    :host(i-button[role="option"][disabled]) .option > .icon g,
+    :host(i-button[role="listbox"][disabled]) .option > .icon g, 
+    :host(i-button[role="option"][disabled]:hover) > .icon g,
+    :host(i-button[role="listbox"][disabled]:hover) .option > .icon g, 
+    :host(i-button[role="option"][disabled]:hover) .option > .icon g {
+        --icon-fill: ${disabled_color ? disabled_color : 'var(--primary-disabled-icon-fill)'};
     }
-    :host(i-button[role="listbox"][disabled]) g {
-        --fill: ${fill ? fill : 'var(--color-dark)'};
-        --fill-opacity: ${fill_opacity ? fill_opacity : '0.5'};
-        fill: hsla(var(--fill), var(--fill-opacity));
+    :host(i-button[role="menuitem"]) {
+        --size: ${size ? size : 'var(--menu-size)'};
+        --weight: ${weight ? weight : 'var(--menu-weight)'};
+        --color: ${color ? color : 'var(--menu-color)'};
+        --border-radius: 0;
+        background-color: transparent;
+    }
+    :host(i-button[role="menuitem"]:hover) {
+        --size: ${size_hover ? size_hover : 'var(--menu-size-hover)'};
+        --weight: ${weight_hover ? weight_hover : 'var(--menu-weight-hover)'};
+        --color: ${color_hover ? color_hover : 'var(--menu-color-hover)'};
+    }
+    :host(i-button[role="menuitem"]) .avatar {
+        --avatar-width: ${avatar_width ? avatar_width : 'var(--menu-avatar-width)'};
+        --avatar-height: ${avatar_height ? avatar_height : 'var(--menu-avatar-height)'};
+        --avatar-radius: ${avatar_radius ? avatar_radius : 'var(--menu-avatar-radius)'};
+    }
+    :host(i-button[role="menuitem"]:hover) .avatar {
+        --avatar-width: ${avatar_width_hover ? avatar_width_hover : 'var(--menu-avatar-width-hover)'};
+        --avatar-height: ${avatar_height_hover ? avatar_height_hover : 'var(--menu-avatar-height-hover)'};
+    }
+    :host(i-button[role="menuitem"][disabled]), :host(i-button[role="menuitem"][disabled]):hover {
+        --size: ${disabled_size ? disabled_size : 'var(--menu-disabled-size)'};
+        --color: ${disabled_color ? disabled_color : 'var(--menu-disabled-color)'};
+        --weight: ${disabled_weight ? disabled_weight : 'var(--menu-disabled-weight)'};
+    }
+    :host(i-button[role="menuitem"][disabled]) g ,
+    :host(i-button[role="menuitem"][disabled]:hover) g {
+        --icon-fill: ${disabled_icon_fill ? disabled_icon_fill : 'var(--primary-disabled-icon-fill)'};
+    }
+    :host(i-button[role="option"]) > .icon {
+        --icon-size: ${list_selected_icon_size ? list_selected_icon_size : 'var(--list-selected-icon-size)'};
+    }
+    :host(i-button[role="option"]:hover) > .icon {
+        --icon-size: ${list_selected_icon_size_hover ? list_selected_icon_size_hover : 'var(--list-selected-icon-size-hover)'};
+    }
+    :host(i-button[role="option"]) > .icon g {
+        --icon-fill: ${list_selected_icon_fill ? list_selected_icon_fill : 'var(--list-selected-icon-fill)'};
+    }
+    :host(i-button[role="option"]:hover) > .icon g {
+        --icon-fill: ${list_selected_icon_fill_hover ? list_selected_icon_fill_hover : 'var(--list-selected-icon-fill-hover)'};
+    }
+    :host(i-button[role="option"][aria-current="true"]) > .icon, 
+    :host(i-button[role="option"][aria-current="true"]:hover) > .icon {
+        --icon-size: ${current_list_selected_icon_size ? current_list_selected_icon_size : 'var(--current-list-selected-icon-size)'};
+    }
+    :host(i-button[role="option"][aria-current="true"]) > .icon g, 
+    :host(i-button[role="option"][aria-current="true"]:hover) > .icon g { 
+        --icon-fill: ${current_list_selected_icon_fill ? current_list_selected_icon_fill : 'var(--current-list-selected-icon-fill)'};
+    }
+    :host(i-button[role="option"][aria-selected="false"]) > .icon {
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    :host(i-button[role="option"][aria-selected="true"]) > .icon {
+        opacity: 1;
+    }
+    /* define grid */
+    :host(i-button) .text {
+        ${make_grid(grid.text)}
+    }
+    :host(i-button) .icon {
+        --icon-size: ${icon_size ? icon_size : 'var(--primary-icon-size)'};
+        display: block;
+        width: var(--icon-size);
+        transition: width 0.25s ease-in-out;
+        ${make_grid(grid.icon)}
+    }
+    :host(i-button:hover) .icon {
+        --icon-size: ${icon_size_hover ? icon_size_hover : 'var(--primary-icon-size-hover)'};
+    }
+    :host(i-button) .listbox {
+        display: grid;
+        max-width: 100%;
+        ${make_grid(grid.listbox)}
+    }
+    :host(i-button) .option {
+        display: grid;
+        max-width: 100%;
+        ${make_grid(grid_option)}
+    }
+    :host(i-button) .option > .icon {
+        ${make_grid(grid.option_icon)}
+    }
+    :host(i-button) .option > .avatar {
+        ${make_grid(grid.option_avatar)}
+    }
+    :host(i-button) .option > .text {
+        ${make_grid(grid.option_text)}
     }
     ${custom_style}
     `
 
     return widget()
 }
-},{"message-maker":29,"support-style-sheet":30}],29:[function(require,module,exports){
+},{"make-element":29,"make-grid":30,"make-icon":31,"make-image":32,"message-maker":33,"support-style-sheet":34}],29:[function(require,module,exports){
+module.exports = make_element
+
+function make_element({name = '', classlist = null, role }) {
+    const el = document.createElement(name)
+    if (classlist) ste_class()
+    if (role) set_role()
+    return el
+
+    function ste_class () {
+        el.className = classlist
+    }
+    
+    function set_role () {
+        const tabindex = role.match(/button|switch/) ? 0 : -1
+        el.setAttribute('role', role)
+        el.setAttribute('tabindex',  tabindex)
+    }
+}
+
+
+},{}],30:[function(require,module,exports){
+module.exports = make_grid
+
+function make_grid (opts = {}) {
+    const {areas, area, rows, columns, row, auto = {}, column, gap, justify, align} = opts
+    let style = ''
+    grid_init ()
+    return style
+
+    function grid_init () {
+        make_rows()
+        make_columns()
+        make_auto()
+        make_row()
+        make_column()
+        make_justify()
+        make_align()
+        make_gap()
+        make_area()
+        make_areas()
+    }
+     
+    function make_areas () {
+        if (typeof areas === 'object') {
+            let template = `grid-template-areas:`
+            areas.map( a => template += `"${a}"`)
+            return style += template + ';'
+        }
+        if (typeof areas === 'string') return areas ? style +=`grid-template-areas: "${areas}";` : ''
+    }
+    function make_area () {
+        return area ? style += `grid-area: ${area};` : ''
+    }
+
+    function make_rows () { 
+        return rows ? style +=  `grid-template-rows: ${rows};` : ''
+    }
+
+    function make_columns () {
+        return columns ? style += `grid-template-columns: ${columns};` : ''
+    }
+
+    function make_row () {
+        return row ? style += `grid-row: ${row};` : ''
+    }
+
+    function make_column () {
+        return column ? style += `grid-column: ${column};` : ''
+    }
+
+    function make_justify () {
+        if (justify === void 0) return
+        const result = justify.split('-')
+        const [type, method] = result
+        return style += `justify-${type}: ${method};`
+    }
+
+    function make_align () {
+        if (align === void 0) return
+        const result = align.split('-')
+        const [type, method] = result
+        return style += `align-${type}: ${method};`
+    }
+
+    function make_gap () {
+        if (gap === void 0) return ''
+        return style += `gap: ${gap};`
+    }
+
+    function make_auto () {
+        const {auto_flow = null, auto_rows = null, auto_columns = null} = auto
+        const grid_auto_flow = auto_flow ? `grid-auto-flow: ${auto_flow};` : ''
+        const grid_auto_rows = auto_rows ? `grid-auto-rows: ${auto_rows};` : ''
+        const grid_auto_columns = auto_columns ? `grid-auto-columns: ${auto_columns};` : ''
+        return style += `${grid_auto_flow}${grid_auto_rows}${grid_auto_columns}`
+    }
+}
+},{}],31:[function(require,module,exports){
+const i_icon = require('datdot-ui-icon')
+
+module.exports = {main_icon, select_icon, list_icon}
+
+function main_icon ({name, path}) {
+    const el = i_icon({name, path})
+    return el
+}
+
+function select_icon ({name = 'arrow-down', path}) {
+    const el =  i_icon({name, path})
+    return el
+}
+
+function list_icon ({name = 'check', path} ) {
+    const el =  i_icon({name, path})
+    return el
+}
+
+
+},{"datdot-ui-icon":35}],32:[function(require,module,exports){
+module.exports = img
+
+function img ({src, alt}) {
+    const img = document.createElement('img')
+    img.setAttribute('src', src)
+    img.setAttribute('alt', alt)
+    return img
+}
+},{}],33:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],30:[function(require,module,exports){
+},{"dup":26}],34:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],31:[function(require,module,exports){
+},{"dup":27}],35:[function(require,module,exports){
 const style_sheet = require('support-style-sheet')
 const svg = require('svg')
 
@@ -1759,9 +2540,9 @@ module.exports = ({name, path, is_shadow = false, theme}) => {
     return symbol
 }
 
-},{"support-style-sheet":32,"svg":33}],32:[function(require,module,exports){
+},{"support-style-sheet":36,"svg":37}],36:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],33:[function(require,module,exports){
+},{"dup":27}],37:[function(require,module,exports){
 module.exports = svg
 function svg (path) {
     const span = document.createElement('span')
@@ -1775,70 +2556,248 @@ function svg (path) {
     }
     return span
 }   
-},{}],34:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 const bel = require('bel')
 const style_sheet = require('support-style-sheet')
-const button = require('datdot-ui-button')
+const {i_button, i_link} = require('datdot-ui-button')
+const button = i_button
 const message_maker = require('message-maker')
 module.exports = i_list
 
-function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no items'}], mode = 'multiple-select', expanded = false, hidden = true, theme }, protocol) {
+function i_list (opts = {}, protocol) {
+    const {page = 'Demo', flow = 'ui-list', name, body = [{text: 'no items'}], mode = 'multiple-select', expanded = false, hidden = true, theme = {} } = opts
     const recipients = []
     const make = message_maker(`${name} / ${flow} / i_list`)
     const message = make({type: 'ready'})
+    let is_hidden = hidden
+    let is_expanded = !is_hidden ? !is_hidden : expanded
+    const {grid} = theme
 
     function widget () {
         const send = protocol( get )
         send(message)
         const list = document.createElement('i-list')
         const shadow = list.attachShadow({mode: 'open'})
-        list.setAttribute('role', 'listbox')
-        list.ariaHidden = hidden
+        list.ariaHidden = is_hidden
         list.ariaLabel = name
         list.tabIndex = -1
-        list.ariaExpanded = expanded
+        list.ariaExpanded = is_expanded
         list.dataset.mode = mode
         style_sheet(shadow, style)
         try {
-            body.map( (option, i) => {
-                const {text, icon, current = false, selected = false} = option
-                const is_current = mode === 'single-select' ? current : false
-                let item = button({
-                    page, 
-                    name: text, 
-                    body: text,
-                    icon, 
-                    role: 'option',
-                    mode, 
-                    current: is_current, 
-                    selected,
-                    theme: { 
-                        props: {
-                            color_hover: 'var(--color)', 
-                            bg_color: 'transparent', 
-                            bg_color_hover: 'transparent'}
-                    }}, button_protocol(text))
-                const li = (text === 'no items') 
-                ? bel`<li role="listitem" data-option=${text}">${text}</li>`
-                : bel`<li role="option" data-option=${text}" aria-selected=${selected}>${item}</li>`
-                const option_list = text.toLowerCase().split(' ').join('-')
-                shadow.append(li)
-                const make = message_maker(`${option_list} / option / ${flow} / widget`)
-                send( make({type: 'ready'}) )
-            })
-            if (body.length === 0) send({type: 'error', data: 'body no items'})
+            if (mode.match(/single|multiple/)) {
+                list.setAttribute('role', 'listbox')
+                make_select_list()
+            }   
+            if (mode.match(/dropdown/)) {
+                list.setAttribute('role', 'menubar')
+                make_list()
+            }
+            if (body.length === 0) send(make({type: 'error', data: 'body no items'}))
         } catch(e) {
-            send({type: 'error', data: 'something went wrong'})
+            send(make({type: 'error', data: {message: 'something went wrong', opts }}))
         }
         
         return list
 
+        function make_list () {
+            return body.map( (list, i) => {
+                const {text = undefined, role = 'link', url = '#', target, icon, cover, disabled = false, theme = {}} = list
+                const {style = ``, props = {}} = theme
+                const {
+                    size = `var(--primary-size)`, 
+                    size_hover = `var(--primary-size)`, 
+                    color = `var(--primary-color)`, 
+                    color_hover = `var(--primary-color-hover)`,     
+                    bg_color = 'var(--primary-bg-color)', 
+                    bg_color_hover = 'var(--primary-bg-color-hover)', 
+                    icon_fill = 'var(--primary-color)', 
+                    icon_fill_hover = 'var(--primary-color-hover)', 
+                    icon_size = 'var(--primary-icon-size)', 
+                    avatar_width = 'var(--primary-avatar-width)', 
+                    avatar_height = 'var(--primary-avatar-height)', 
+                    avatar_radius = 'var(--primary-avatar-radius)',
+                    disabled_color = 'var(--primary-disabled-color)',
+                    disabled_bg_color = 'var(--primary-disabled-bg-color)',
+                    disabled_icon_fill = 'var(--primary-disabled-icon-fill)',
+                } = props
+                var item = text
+                if (role === 'link' ) {
+                    var item = i_link({
+                        page,
+                        name: text,
+                        body: text,
+                        role: 'menuitem',
+                        link: {
+                            url,
+                            target
+                        },
+                        icons: {
+                            icon
+                        },
+                        cover,
+                        disabled,
+                        theme: {
+                            style,
+                            props: {
+                                size,
+                                size_hover,
+                                color,
+                                color_hover,
+                                bg_color,
+                                bg_color_hover,
+                                icon_fill,
+                                icon_fill_hover,
+                                icon_size,
+                                avatar_width,
+                                avatar_height,
+                                avatar_radius,
+                                disabled_color,
+                                disabled_bg_color,
+                                disabled_icon_fill,
+                            },
+                            grid
+                        }
+                    }, button_protocol(text))
+                }
+                if (role === 'menuitem') {
+                    var item = i_button({
+                        name: text,
+                        body: text,
+                        role,
+                        icons: {
+                            icon
+                        },
+                        cover,
+                        disabled,
+                        theme: {
+                            style,
+                            props: {
+                                size,
+                                size_hover,
+                                color,
+                                color_hover,
+                                icon_fill,
+                                icon_fill_hover,
+                                icon_size,
+                                avatar_width,
+                                avatar_height,
+                                avatar_radius,
+                                disabled_color,
+                                disabled_icon_fill,
+                            },
+                            grid
+                        }
+                    }, button_protocol(text))
+                }
+                
+                const li = bel`<li role="none">${item}</li>`
+                if (disabled) li.setAttribute('disabled', disabled)
+                shadow.append(li)
+            })
+            
+        }
+        function make_select_list () {
+            return body.map( (option, i) => {
+                const {text, icon, list, cover, current = false, selected = false, disabled = false, theme = {}} = option
+                const is_current = mode === 'single-select' ? current : false
+                const {style = ``, props = {}} = theme
+                const {
+                    size = 'var(--primary-size)', 
+                    size_hover = 'var(--primary-size)',
+                    weight = '300', 
+                    color = 'var(--primary-color)', 
+                    color_hover = 'var(--primary-color-hover)', 
+                    bg_color = 'var(--primary-bg-color)', 
+                    bg_color_hover = 'var(--primary-bg-color-hover)', 
+                    icon_size = 'var(--primary-icon-size)',
+                    icon_fill = 'var(--primary-icon-fill)',
+                    icon_fill_hover = 'var(--primary-icon-fill-hover)',
+                    avatar_width = 'var(--primary-avatar-width)', 
+                    avatar_height = 'var(--primary-avatar-height)', 
+                    avatar_radius = 'var(--primary-avatar-radius)',
+                    current_size = 'var(--current-list-size)',
+                    current_color = 'var(--current-list-color)',
+                    current_weight = 'var(--current-list-weight)',
+                    current_icon_size = 'var(--current-icon-size)',
+                    current_icon_fill = 'var(--current-icon-fill)',
+                    current_list_selected_icon_size = 'var(--current-list-selected-icon-size)',
+                    current_list_selected_icon_fill = 'var(--current-list-selected-icon-fill)',
+                    list_selected_icon_size = 'var(--list-selected-icon-size)',
+                    list_selected_icon_fill = 'var(--list-selected-icon-fill)',
+                    list_selected_icon_fill_hover = 'var(--list-selected-icon-fill-hover)',
+                    disabled_color = 'var(--primary-disabled-color)',
+                    disabled_bg_color = 'var(--primary-disabled-bg-color)',
+                    disabled_icon_fill = 'var(--primary-disabled-fill)',
+                    opacity = '0'
+                } = props
+
+                const item = button(
+                {
+                    page, 
+                    name: text, 
+                    body: text,
+                    cover,
+                    role: 'option',
+                    mode,
+                    icons: {
+                        icon,
+                        list
+                    },
+                    current: is_current, 
+                    selected,
+                    disabled,
+                    theme: {
+                        style,
+                        props: {
+                            size,
+                            size_hover,
+                            weight,
+                            color,
+                            color_hover,
+                            bg_color,
+                            bg_color_hover,
+                            icon_size,
+                            icon_fill,
+                            icon_fill_hover,
+                            avatar_width,
+                            avatar_height,
+                            avatar_radius,
+                            current_size,
+                            current_color,
+                            current_weight,
+                            current_icon_size,
+                            current_icon_fill,
+                            current_list_selected_icon_size,
+                            current_list_selected_icon_fill,
+                            list_selected_icon_size,
+                            list_selected_icon_fill,
+                            list_selected_icon_fill_hover,
+                            disabled_color,
+                            disabled_bg_color,
+                            disabled_icon_fill,
+                            opacity
+                        },
+                        grid
+                    }
+                }, button_protocol(text))
+                const li = (text === 'no items') 
+                ? bel`<li role="listitem" data-option=${text}">${text}</li>`
+                : bel`<li role="option" data-option=${text}" aria-selected=${is_current ? is_current : selected}>${item}</li>`
+                if (is_current) li.setAttribute('aria-current', is_current)
+                if (disabled) li.setAttribute('disabled', disabled)
+                const option_list = text.toLowerCase().split(' ').join('-')
+                const make = message_maker(`${option_list} / option / ${flow} / widget`)
+                send( make({type: 'ready'}) )
+                shadow.append(li)
+            })
+        }
         function handle_expanded_event (data) {
             list.ariaHidden = data
             list.ariaExpanded = !data
         }
         function handle_select_event (from, data) {
-            const selected = !data
+            const selected = data.selected
             const type = selected ? 'selected' : 'unselected'
             const { childNodes } = shadow
             const lists = shadow.firstChild.tagName !== 'STYLE' ? childNodes : [...childNodes].filter( (child, index) => index !== 0)
@@ -1846,7 +2805,7 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
                 const make = message_maker(`${from} / option / ${flow}`)
                 const arr = []
                 lists.forEach( child => {
-                    child.dataset.option === from ? child.setAttribute('aria-selected', selected) : false
+                    if (child.dataset.option === from ) child.setAttribute('aria-selected', selected )
                     if (child.getAttribute('aria-selected') === 'true') arr[arr.length] = child.dataset.option
                 })
                 recipients[from]( make({type, data: selected}) )
@@ -1854,13 +2813,16 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
             }
             if (mode === 'single-select') {
                 lists.forEach( child => {
-                    const state = from === child.dataset.option ? !data : data
+                    const state = from === child.dataset.option ? data.selected : !data.selected
                     const current = state ? from : child.dataset.option
                     const make = message_maker(`${current} / option / ${flow}`)
                     const type = state ? 'selected' : 'unselected'
                     recipients[current]( make({type, data: state}) )
                     send(make({to: name, type, data: {mode, selected: from} }))
                     list.setAttribute('aria-activedescendant', from)
+                    child.setAttribute('aria-selected', state )
+                    if (state) child.setAttribute('aria-current', state)
+                    else child.removeAttribute('aria-current')
                 })
             }
         }
@@ -1870,13 +2832,23 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
                 return get
             }
         }
+        function handle_click_event(msg) {
+            const {head, type, data} = msg
+            const role = head[0].split(' / ')[1]
+            const from = head[0].split(' / ')[0]
+            const make = message_maker(`${from} / ${role} / ${flow}`)
+            const message = make({to: '*', type, data})
+            send(message)
+
+        }
         function get (msg) {
             const {head, refs, type, data} = msg
             const to = head[1]
             const id = head[2]
             const role = head[0].split(' / ')[1]
             const from = head[0].split(' / ')[0]
-            if (type === 'click') return handle_select_event(from, data)
+            if (role === 'menuitem') return handle_click_event(msg)
+            if (type === 'click' && role === 'option') return handle_select_event(from, data)
             if (type.match(/expanded|unexpanded/)) return handle_expanded_event(data)
         }
     }
@@ -1885,13 +2857,11 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
     const custom_style = theme ? theme.style : ''
     // set CSS variables
     if (theme && theme.props) {
-    var {size, size_hover, current_size,
-        weight, weight_hover, current_weight,
-        color, color_hover, current_color, current_bg_color, 
-        bg_color, bg_color_hover, border_color_hover,
-        border_width, border_style, border_opacity, border_color, border_radius, 
-        padding, width, height, opacity,
-        fill, fill_hover, icon_size, current_fill,
+    var {
+        bg_color, bg_color_hover,
+        current_bg_color, current_bg_color_hover, disabled_bg_color,
+        width, height, border_width, border_style, border_opacity, border_color,
+        border_color_hover, border_radius, padding,  opacity,
         shadow_color, offset_x, offset_y, blur, shadow_opacity,
         shadow_color_hover, offset_x_hover, offset_y_hover, blur_hover, shadow_opacity_hover
     } = theme.props
@@ -1899,10 +2869,11 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
 
     const style = `
     :host(i-list) {
-        --color: ${color ? color : 'var(--primary-color)'};
-        --bg-color: ${bg_color ? bg_color : 'var(--color-white)'};
+        ${width && 'width: var(--width);'};
+        ${height && 'height: var(--height);'};
         display: grid;
         margin-top: 5px;
+        max-width: 100%;
     }
     :host(i-list[aria-hidden="true"]) {
         opacity: 0;
@@ -1914,29 +2885,63 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
         animation: open 0.3s;
     }
     li {
+        --bg-color: ${bg_color ? bg_color : 'var(--primary-bg-color)'};
+        --border-radius: ${border_radius ? border_radius : 'var(--primary-radius)'};
+        --border-width: ${border_width ? border_width : 'var(--primary-border-width)'};
+        --border-style: ${border_style ? border_style : 'var(--primary-border-style)'};
+        --border-color: ${border_color ? border_color : 'var(--primary-border-color)'};
+        --border-opacity: ${border_opacity ? border_opacity : 'var(--primary-border-opacity)'};
+        --border: var(--border-width) var(--border-style) hsla(var(--border-color), var(--border-opacity));
         display: grid;
-        border: 1px solid hsl(var(--primary-color));
-        margin-top: -1px;
-        color: hsl(var(--color));
+        grid-template-columns: 1fr;
         background-color: hsl(var(--bg-color));
-        transition: color 0.3s, background-color 0.3s ease-in-out;
+        border: var(--border);
+        margin-top: -1px;
         cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
     }
     li:hover {
-        --bg-color: ${bg_color_hover ? bg_color_hover : 'var(--color-greyEB)'};
+        --bg-color: ${bg_color_hover ? bg_color_hover : 'var(--primary-bg-color-hover)'};
+    }
+    :host(i-list) li:nth-of-type(1) {
+        border-top-left-radius: var(--border-radius);
+        border-top-right-radius: var(--border-radius);
+    }
+    li:last-child {
+        border-bottom-left-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
     }
     [role="listitem"] {
-        --color: var(--color-grey88);
         display: grid;
         grid-template-rows: 24px;
-        font-size: var(--size14);
         padding: 11px;
         align-items: center;
-        broder: 1px solid hsl(var(--color-black));
     }
     [role="listitem"]:hover {
-        --bg-color: var(--color-white);
         cursor: default;
+    }
+    li[disabled="true"], li[disabled="true"]:hover {
+        background-color: ${disabled_bg_color ? disabled_bg_color : 'var(--primary-disabled-bg-color)'};
+        cursor: not-allowed;
+    }
+    [role="none"] {
+        --bg-color: var(--list-bg-color);
+        --opacity: 1;
+        background-color: hsla(var(--bg-color), var(--opacity));
+    }
+    [role="none"]:hover {
+        --bg-color: var(--list-bg-color-hover);
+        --opacity: 1;
+        background-color: hsla(var(--bg-color), var(--opacity));
+    }
+    [role="none"] i-link {
+        padding: 12px;
+    }
+    [role="option"] i-button.icon-right, [role="option"] i-button.text-left {
+        grid-template-columns: auto 1fr auto;
+    }
+    [aria-current="true"] {
+        --bg-color: ${current_bg_color ? current_bg_color : 'var(--current-bg-color)'};
     }
     @keyframes close {
         0% {
@@ -1959,11 +2964,11 @@ function i_list ({page = 'Demo', flow = 'ui-list', name, body = [{text: 'no item
 
     return widget()
 }
-},{"bel":4,"datdot-ui-button":28,"message-maker":35,"support-style-sheet":36}],35:[function(require,module,exports){
+},{"bel":4,"datdot-ui-button":28,"message-maker":39,"support-style-sheet":40}],39:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],36:[function(require,module,exports){
+},{"dup":26}],40:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],37:[function(require,module,exports){
+},{"dup":27}],41:[function(require,module,exports){
 module.exports = attributeToProperty
 
 var transform = {
@@ -1984,7 +2989,7 @@ function attributeToProperty (h) {
   }
 }
 
-},{}],38:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var attrToProp = require('hyperscript-attribute-to-property')
 
 var VAR = 0, TEXT = 1, OPEN = 2, CLOSE = 3, ATTR = 4
@@ -2281,7 +3286,7 @@ var closeRE = RegExp('^(' + [
 ].join('|') + ')(?:[\.#][a-zA-Z0-9\u007F-\uFFFF_:-]+)*$')
 function selfClosing (tag) { return closeRE.test(tag) }
 
-},{"hyperscript-attribute-to-property":37}],39:[function(require,module,exports){
+},{"hyperscript-attribute-to-property":41}],43:[function(require,module,exports){
 var inserted = {};
 
 module.exports = function (css, options) {
@@ -2305,82 +3310,55 @@ module.exports = function (css, options) {
     }
 };
 
-},{}],40:[function(require,module,exports){
-const bel = require('bel')
+},{}],44:[function(require,module,exports){
 const style_sheet = require('support-style-sheet')
 const message_maker = require('message-maker')
-// datdot-ui dependencies
-const button = require('datdot-ui-button')
-const list = require('datdot-ui-list')
-const i_icon = require('datdot-ui-icon')
+const make_button = require('make-button')
+const make_list = require('make-list')
 
 module.exports = i_dropdown
 
-function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expanded = false, disabled = false, mode = 'single-select', theme}, protocol) {
-    let {content, button_mode = 'dropdown', button_icon = 'arrow-down', list_name = 'dropdown-list', list_icon = 'check', path = 'assets', options } = body
+function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, options = {}, expanded = false, disabled = false, mode = 'single-select', theme}, protocol) {
+    const {button = {}, list = {}} = options
     const recipients = []
     const make = message_maker(`${name} / ${flow} / ${page}`)
     const message = make({type: 'ready'})
-    const check_current_undefined = (args) => args.current === undefined 
-    const check_selected_undefined = (args) => args.selected === undefined 
     let is_expanded = expanded
     let is_disabled = disabled
     let store_selected = []
+    if (mode === 'single-select') {
+        var selected = {...button}
+        list.array.map( item => {
+            const obj = item.current || item.selected ?  item : list.array[0]
+            selected = {
+                name: button.name,
+                body: obj.text,
+                icons: {
+                    select: button.select ? button.select : undefined,
+                    icon: obj.icon,
+                },
+                cover: obj.cover
+            }
+        })
 
-    const arr = (mode === 'single-select') ? make_single_select() : (mode === 'multiple-select') ? make_multiple_select() : options
 
-    arr.filter( item => {
-        if (item.selected) return store_selected.push(item.text)
-    })
+    }
 
     function widget () {
         const send = protocol(get)
         const dropdown = document.createElement('i-dropdown')
         const shadow = dropdown.attachShadow({mode: 'closed'})
-        const btn = button(
-        {
-            name: `${name}-dropdown`,
-            role: 'listbox', 
-            icon: i_icon({name: button_icon, path}),
-            body: button_mode === 'selector' || content !== void 0 ? content : void 0,
-            mode,
-            expanded: is_expanded,
-            disabled: is_disabled,
-            theme: {
-                style: `
-                :host(i-button) .icon {
-                    transform: rotate(0deg);
-                    transition: transform 0.4s ease-in-out;
-                }
-                :host(i-button[aria-expanded="true"]) .icon {
-                    transform: rotate(${mode === 'single-select' ? '-180' : '0' }deg);
-                }
-                `,
-                props: {
-                    border_width: '1px',
-                    border_color: 'var(--color-black)',
-                    border_style: 'solid'
-                }
-            }
-        }, dropdown_protocol(`${name}-dropdown`))
-
-        const dropdown_list = list(
-        {
-            name: list_name, 
-            body: arr, 
-            mode,
-            expanded: is_expanded,
-            hidden: !is_expanded
-        }, dropdown_protocol(list_name))
+        const i_button = make_button({page, option: mode === 'single-select' ? selected : options.button, mode, expanded: is_expanded}, dropdown_protocol)
+        const i_list = make_list({page, option: options.list, mode, hidden: is_expanded}, dropdown_protocol)
         send(message)
         dropdown.setAttribute('aria-label', name)
-        dropdown.setAttribute('disabled', is_disabled)
-        style_sheet(shadow, style)
-        shadow.append(btn)
+        if (is_disabled) dropdown.setAttribute('disabled', is_disabled)
+        shadow.append(i_button)
         if (is_expanded) {
-            shadow.append(dropdown_list)
+            shadow.append(i_list)
             send(make({type: 'expanded', data: {selected: store_selected}}))
         }
+        style_sheet(shadow, style)
         handle_expanded()
         
         return dropdown
@@ -2388,13 +3366,13 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
         function handle_expanded () {
             // trigger expanded event via document.body
             document.body.addEventListener('click', (e)=> {
-                const type = 'unexpanded'
-                const to = `${list_name} / listbox / ui-list`
+                const type = 'collapse'
+                const to = `${options.button ? options.button.name : name} / listbox / ui-list`
                 if (e.target !== dropdown) {
-                    dropdown_list.remove()
                     if (is_expanded) {
                         is_expanded = !is_expanded
-                        recipients[`${name}-dropdown`]( make({to, type, data: is_expanded}) )
+                        recipients[options.button.name]( make({to, type, data: is_expanded}) )
+                        recipients[options.list.name]( make({type, data: !is_expanded}) )
                         send( make({to, type, data: {selected: store_selected}}) )
                     }
                 }
@@ -2403,10 +3381,10 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
 
         function handle_change_selector (data) {
             const {mode, selected} = data
-            if (button_mode == 'dropdown') return
+            if (mode == 'dropdown') return
             if (mode === 'single-select') {
-                const message = make({to: `${name}-dropdown / listbox / ui-button`, type: 'changed', data: selected, refs: [data]})
-                recipients[`${name}-dropdown`](message)
+                const message = make({to: `${options.button.name} / listbox / ui-button`, type: 'changed', data: {body: selected}, refs: [data]})
+                recipients[name](message)
                 send(message)
                 store_selected = selected
             }
@@ -2417,11 +3395,11 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
 
         function handle_dropdown_menu_event (from, data) {
             const state = data.expanded
-            const type = state ? 'expanded' : 'unexpanded'
-            const to = `${list_name} / listbox / ui-list`
+            const type = state ? 'expanded' : 'collapse'
+            const to = `${from} / listbox / ui-list`
             is_expanded = state
-            shadow.append(dropdown_list)
-            recipients[list_name]( make({type, data: !state}) )
+            shadow.append(i_list)
+            recipients[options.list.name]( make({type, data: !state}) )
             recipients[from]( make({to, type, data: state}) )
             send( make({to, type, data: {selected: store_selected}}) )
         }
@@ -2433,20 +3411,164 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
             }
         }
     
+        function handle_select_event (data) {
+            
+        }
+
         function get (msg) {
             const {head, refs, type, data} = msg 
             const from = head[0].split('/')[0].trim()
             send(msg)
             if (type === 'click') return handle_dropdown_menu_event(from, data)
-            if (type.match(/selected|unselected/)) return handle_change_selector(data)
+            if (type.match(/selected|unselected/)) return handle_select_event(data)
+            if (type === 'changed') return console.log(data);
         }
     }
 
-    function make_single_select () {
-        return options.map((opt, index) => {
-            const check_options_current = options.every(check_current_undefined)
-            const check_options_selected = options.every(check_selected_undefined)
-            const obj = {...opt, icon: i_icon({name: list_icon, path})}
+    
+    // insert CSS style
+    const custom_style = theme ? theme.style : ''
+    // set CSS variables
+    if (theme && theme.props) {
+        var {size, size_hover, current_size, disabled_size,
+            weight, weight_hover, current_weight, current_hover_weight,
+            color, color_hover, current_color, current_bg_color, disabled_color, disabled_bg_color,
+            current_hover_color, current_hover_bg_color,
+            bg_color, bg_color_hover, border_color_hover,
+            border_width, border_style, border_opacity, border_color, border_radius, 
+            padding, margin, width, height, opacity,
+            shadow_color, offset_x, offset_y, blur, shadow_opacity,
+            shadow_color_hover, offset_x_hover, offset_y_hover, blur_hover, shadow_opacity_hover,
+            margin_top
+        } = theme.props
+    }
+
+    const style = `
+    :host(i-dropdown) {
+        position: relative;
+        display: grid;
+        width: 100%;
+    }
+    :host(i-dropdown[disabled]) {
+        cursor: not-allowed;
+    }
+    i-button {
+        position: relative;
+        z-index: 2;
+    }
+    i-list {
+        position: absolute;
+        left: 0;
+        top: 40px;
+        margin-top: ${margin_top ? margin_top : '5px'};
+        z-index: 1;
+        width: 100%;
+    }
+    i-list[aria-hidden="false"] {
+        animation: down 0.3s ease-in;
+    }
+    
+    i-list[aria-hidden="true"] {
+        animation: up 0.3s ease-out;
+    } 
+    
+    @keyframes down {
+        0% {
+            opacity: 0;
+            top: 0px;
+        }
+        50% {
+            opacity: 0.5;
+            top: 20px;
+        }
+        100%: {
+            opacity: 1;
+            top: 40px;
+        }
+    }
+    
+    @keyframes up {
+        0% {
+            opacity: 1;
+            top: 40px;
+        }
+        50% {
+            top: 20px;
+        }
+        75% {
+            opacity: 0.5;
+        }
+        100%: {
+            opacity: 0;
+            top: 0px;
+        }
+    } 
+    ${custom_style}
+    `
+
+    return widget()
+}
+
+
+},{"make-button":45,"make-list":46,"message-maker":47,"support-style-sheet":48}],45:[function(require,module,exports){
+const {i_button} = require('datdot-ui-button')
+module.exports = make_button
+function make_button ({page, option = {}, mode, expanded}, protocol) {
+    const {flow = 'ui-dropdown', name, role = 'listbox', body, icons, cover, disabled = false, theme = {}} = option
+    const { 
+        style = `
+        :host(i-button) > .icon {
+            transform: rotate(0deg);
+            transition: transform 0.4s ease-in-out;
+        }
+        :host(i-button[aria-expanded="true"]) > .icon {
+            transform: rotate(${mode === 'single-select' ? '-180' : '0' }deg);
+        }
+        `
+        ,
+        props = {
+            opacity: '1'
+        },
+        grid = {}
+    } = theme
+
+    const match = mode.match(/single|multiple/)
+    const button_mode = match ? 'selector' : 'menu'
+    return i_button({
+        page,
+        flow, 
+        name, 
+        role,
+        body,
+        icons,
+        cover, 
+        mode: button_mode, 
+        expanded, disabled, 
+        theme: {style, props, grid}
+    }, protocol(name))
+}
+
+},{"datdot-ui-button":28}],46:[function(require,module,exports){
+const i_list = require('datdot-ui-list')
+module.exports = make_list
+function make_list ({page, option = {}, mode, hidden}, protocol) {
+    const {flow = 'ui-dropdown-list', name, role = 'option', array, theme} = option
+    let store_selected = []
+    let render_list = []
+    const check_current_undefined = (args) => args.current === undefined 
+    const check_selected_undefined = (args) => args.selected === undefined 
+    if (mode === 'single-select') render_list = make_single_select(array) 
+    if (mode === 'multiple-select') render_list = make_multiple_select(array) 
+    render_list.filter( item => {
+        if (item.selected) return store_selected.push(item.text)
+    })
+    return i_list({flow, name, role, body: render_list, mode, hidden, expanded: !hidden, theme}, protocol(name))
+
+    function make_single_select (args) {
+        return args.map((opt, index) => {
+            const check_options_current = args.every(check_current_undefined)
+            const check_options_selected = args.every(check_selected_undefined)
+            const obj = {...opt}
             // console.log('current undefined:', check_options_current);
             // console.log('selected undefined:', check_options_selected);
             // if current and selected are undefined, then find first element to be current and selected, others would be false
@@ -2476,41 +3598,19 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, body = {}, expa
         })
     }
 
-    function make_multiple_select () {
-        const check_options_selected = options.every(check_selected_undefined)
-        return options.map((opt, index) => {
-            const obj = {...opt, icon: i_icon({name: list_icon, path})}
+    function make_multiple_select (args) {
+        const check_options_selected = args.every(check_selected_undefined)
+        return args.map((opt, index) => {
+            const obj = {...opt}
             // console.log('selected undefined:', check_options_selected);
             if (check_options_selected) obj.selected = check_options_selected
             obj.selected = opt.selected === undefined ? true : opt.selected 
             return obj
         })
     }
-
-    const style = `
-    :host(i-dropdown) {
-        position: relative;
-        display: grid;
-        width: 100%;
-    }
-    :host(i-dropdown[disabled]) {
-        cursor: not-allowed;
-    }
-    i-list {
-        position: absolute;
-        left: 0;
-        top: 40px;
-        z-index: 99;
-        width: 100%;
-    }
-    `
-
-    return widget()
 }
-
-
-},{"bel":4,"datdot-ui-button":28,"datdot-ui-icon":31,"datdot-ui-list":34,"message-maker":41,"support-style-sheet":42}],41:[function(require,module,exports){
+},{"datdot-ui-list":38}],47:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],42:[function(require,module,exports){
+},{"dup":26}],48:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
 },{"dup":27}]},{},[1]);
