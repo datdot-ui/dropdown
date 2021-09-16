@@ -5,7 +5,7 @@ const make_list = require('make-list')
 
 module.exports = i_dropdown
 
-function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, options = {}, expanded = false, disabled = false, mode = 'single-select', theme}, protocol) {
+function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expanded = false, disabled = false, mode = 'single-select', theme}, protocol) {
     const {button = {}, list = {}} = options
     const recipients = []
     const make = message_maker(`${name} / ${flow} / ${page}`)
@@ -27,8 +27,6 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, options = {}, e
                 cover: obj.cover
             }
         })
-
-
     }
 
     function widget () {
@@ -41,10 +39,6 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, options = {}, e
         dropdown.setAttribute('aria-label', name)
         if (is_disabled) dropdown.setAttribute('disabled', is_disabled)
         shadow.append(i_button)
-        if (is_expanded) {
-            shadow.append(i_list)
-            send(make({type: 'expanded', data: {selected: store_selected}}))
-        }
         style_sheet(shadow, style)
         handle_expanded()
         
@@ -53,13 +47,13 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, options = {}, e
         function handle_expanded () {
             // trigger expanded event via document.body
             document.body.addEventListener('click', (e)=> {
-                const type = 'collapse'
+                const type = 'collapsed'
                 const to = `${options.button ? options.button.name : name} / listbox / ui-list`
                 if (e.target !== dropdown) {
                     if (is_expanded) {
                         is_expanded = !is_expanded
-                        recipients[options.button.name]( make({to, type, data: is_expanded}) )
-                        recipients[options.list.name]( make({type, data: !is_expanded}) )
+                        recipients[button.name]( make({to, type, data: is_expanded}) )
+                        recipients[list.name]( make({type, data: !is_expanded}) )
                         send( make({to, type, data: {selected: store_selected}}) )
                     }
                 }
@@ -80,17 +74,6 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, options = {}, e
             }
         }
 
-        function handle_dropdown_menu_event (from, data) {
-            const state = data.expanded
-            const type = state ? 'expanded' : 'collapse'
-            const to = `${from} / listbox / ui-list`
-            is_expanded = state
-            shadow.append(i_list)
-            recipients[options.list.name]( make({type, data: !state}) )
-            recipients[from]( make({to, type, data: state}) )
-            send( make({to, type, data: {selected: store_selected}}) )
-        }
-
         function dropdown_protocol (name) {
             return send => {
                 recipients[name] = send
@@ -102,13 +85,30 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, options = {}, e
             
         }
 
+        function handle_expanded_event (data) {
+            const {from, expanded} = data
+            is_expanded = expanded
+            const type = is_expanded ? 'expanded' : 'collapsed'
+            // check which one dropdown is not using then do collapsed
+            if (from !== name) {
+                recipients[name](make({type: 'collapsed', data: is_expanded}))
+                recipients[list.name](make({type, data: !is_expanded}))
+            }
+            // check which dropdown is currently using then do expanded
+            recipients[name](make({type, data: is_expanded}))
+            recipients[list.name](make({type, data: !is_expanded}))
+            if (is_expanded) shadow.append(i_list)
+        }
+
         function get (msg) {
             const {head, refs, type, data} = msg 
             const from = head[0].split('/')[0].trim()
             send(msg)
-            if (type === 'click') return handle_dropdown_menu_event(from, data)
-            if (type.match(/selected|unselected/)) return handle_select_event(data)
-            if (type === 'changed') return console.log(data);
+            // console.log(recipients);
+            if (type.match(/expanded|collapsed/)) return handle_expanded_event(data)
+            // if (type === 'click') return handle_dropdown_menu_event(from, data)
+            // if (type.match(/selected|unselected/)) return handle_select_event(data)
+            // if (type === 'changed') return console.log(data);
         }
     }
 
@@ -154,7 +154,6 @@ function i_dropdown ({page = 'Demo', flow = 'ui-dropdown', name, options = {}, e
     i-list[aria-hidden="false"] {
         animation: down 0.3s ease-in;
     }
-    
     i-list[aria-hidden="true"] {
         animation: up 0.3s ease-out;
     } 
