@@ -12,12 +12,12 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
     const message = make({type: 'ready'})
     let is_expanded = expanded
     let is_disabled = disabled
-    let store_selected = []
+    let store_data = []
     if (mode === 'single-select') {
-        var selected = {...button}
+        var init_selected = {...button}
         list.array.map( item => {
             const obj = item.current || item.selected ?  item : list.array[0]
-            selected = {
+            init_selected = {
                 name: button.name,
                 body: obj.text,
                 icons: {
@@ -27,13 +27,19 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
                 cover: obj.cover
             }
         })
+        store_data.push(init_selected)
+    }
+    if (mode === 'multiple-select') {
+        list.array.map( item => {
+            if (item.selected) store_data.push(item)
+        })
     }
 
     function widget () {
         const send = protocol(get)
         const dropdown = document.createElement('i-dropdown')
         const shadow = dropdown.attachShadow({mode: 'closed'})
-        const i_button = make_button({page, option: mode === 'single-select' ? selected : options.button, mode, expanded: is_expanded}, dropdown_protocol)
+        const i_button = make_button({page, option: mode === 'single-select' ? init_selected : options.button, mode, expanded: is_expanded}, dropdown_protocol)
         const i_list = make_list({page, option: options.list, mode, hidden: is_expanded}, dropdown_protocol)
         send(message)
         dropdown.setAttribute('aria-label', name)
@@ -54,37 +60,32 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
                         is_expanded = !is_expanded
                         recipients[button.name]( make({to, type, data: is_expanded}) )
                         recipients[list.name]( make({type, data: !is_expanded}) )
-                        send( make({to, type, data: {selected: store_selected}}) )
+                        send( make({to, type, data: {selected: store_data}}) )
                     }
                 }
             })
         }
-
-        function handle_change_selector (data) {
+        function handle_change_event (content) {
+            recipients[button.name](make({type: 'changed', data: content}))
+        }
+        function handle_select_event (data) {
             const {mode, selected} = data
-            if (mode == 'dropdown') return
+            let new_data = []
+            if (mode === 'dropdown') return
             if (mode === 'single-select') {
-                const message = make({to: `${options.button.name} / listbox / ui-button`, type: 'changed', data: {body: selected}, refs: [data]})
-                recipients[name](message)
-                send(message)
-                store_selected = selected
+                selected.map( obj => {
+                    if (obj.selected) {
+                        const content = {text: obj.text, cover: obj.cover, icon: obj.icon}
+                        new_data.push(obj)
+                        return handle_change_event (content)
+                    }
+                })
             }
             if (mode === 'multiple-select') {
-                store_selected = selected
+                new_data = selected.filter( obj => obj.selected )
             }
+            store_data = new_data
         }
-
-        function dropdown_protocol (name) {
-            return send => {
-                recipients[name] = send
-                return get
-            }
-        }
-    
-        function handle_select_event (data) {
-            
-        }
-
         function handle_expanded_event (data) {
             const {from, expanded} = data
             is_expanded = expanded
@@ -97,18 +98,21 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
             // check which dropdown is currently using then do expanded
             recipients[name](make({type, data: is_expanded}))
             recipients[list.name](make({type, data: !is_expanded}))
-            if (is_expanded) shadow.append(i_list)
+            if (is_expanded && from == name) shadow.append(i_list)
         }
-
+        function dropdown_protocol (name) {
+            return send => {
+                recipients[name] = send
+                return get
+            }
+        }
         function get (msg) {
             const {head, refs, type, data} = msg 
             const from = head[0].split('/')[0].trim()
             send(msg)
             // console.log(recipients);
             if (type.match(/expanded|collapsed/)) return handle_expanded_event(data)
-            // if (type === 'click') return handle_dropdown_menu_event(from, data)
-            // if (type.match(/selected|unselected/)) return handle_select_event(data)
-            // if (type === 'changed') return console.log(data);
+            if (type.match(/selected/)) return handle_select_event(data)
         }
     }
 

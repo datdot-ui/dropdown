@@ -75,7 +75,7 @@ function demo () {
                     {
                         text: 'Option2',
                         list: {name: 'star'},
-                        selected: false
+                        selected: true
                     },
                     {
                         text: 'Option3',
@@ -136,13 +136,11 @@ function demo () {
         const type = state ? 'expanded' : 'collapsed'
         const to = `${from} / listbox / ui-list`
         recipients[from]( make({to, type, data: {from, expanded: state}}) )
-        // recipients[options.list.name]( make({type, data: {selected: state}}) )
-        // send( make({to, type, data: {selected: store_selected}}) )
         dropdowns.forEach( item => {
             const name = item.getAttribute('aria-label')
             const to = `${name} / listbox / ui-list`
             if (name !== from) {
-                recipients[name]( make({to, type: 'collapsed', data: {stelected: data}}) )
+                recipients[name]( make({to, type: 'collapsed', data}) )
                 item.removeAttribute('style')
             } else {
                 item.style.zIndex = '99'
@@ -161,7 +159,7 @@ function demo () {
         const {head, refs, type, data} = msg 
         const from = head[0].split('/')[0].trim()
         recipients['logs'](msg)
-        if (type === 'click') handle_dropdown_menu_event(from, data)
+        if (type === 'click') return handle_dropdown_menu_event(from, data)
     }
 }
 
