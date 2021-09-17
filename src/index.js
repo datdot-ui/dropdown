@@ -44,10 +44,9 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
         send(message)
         dropdown.setAttribute('aria-label', name)
         if (is_disabled) dropdown.setAttribute('disabled', is_disabled)
-        shadow.append(i_button)
         style_sheet(shadow, style)
         handle_expanded()
-        
+        shadow.append(i_button)
         return dropdown
 
         function handle_expanded () {
