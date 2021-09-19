@@ -22,6 +22,26 @@ function demo () {
             button: {
                 name: 'terminal',
                 // select: {name: 'star'}
+                theme: {
+                    props: {
+                        listbox_collapsed_bg_color: 'var(--color-greyA2)',
+                        listbox_collapsed_bg_color_hover: 'var(--color-white)',
+                        listbox_collapsed_listbox_size: 'var(--size30)',
+                        listbox_collapsed_listbox_color: 'var(--color-white)',
+                        listbox_collapsed_listbox_color_hover: 'var(--color-blue)',
+                        listbox_collapsed_listbox_icon_fill: 'var(--color-white)',
+                        listbox_collapsed_icon_fill_hover: 'var(--color-green)',
+                        listbox_expanded_listbox_color: 'var(--color-orange)',
+                        listbox_expanded_listbox_icon_fill: 'var(--color-black)',
+                        listbox_expanded_icon_fill: 'var(--color-blue)',
+                        listbox_expanded_bg_color: 'var(--color-white)'
+                    },
+                    grid: {
+                        auto: {
+                            auto_flow: 'row'
+                        }
+                    }
+                }
             },
             list: {
                 name: 'terminal-selector',
@@ -29,9 +49,9 @@ function demo () {
                     {
                         text: 'Compact messages',
                         icon: {name: 'plus'},
-                        cover: 'https://cdn.pixabay.com/photo/2021/08/07/08/49/building-6528075_960_720.jpg'
+                        cover: 'https://cdn.pixabay.com/photo/2021/08/07/08/49/building-6528075_960_720.jpg',
                         // current: true,
-                        // selected: false
+                        // selected: false,
                     },
                     {
                         text: 'Comfortable messages',
@@ -308,6 +328,8 @@ const css = csjs`
     --current-list-avatar-height: var(--primary-list-avatar-height);
     /* role listbox settings ---------------------------------------------*/
     /*-- collapsed --*/
+    --listbox-collapsed-bg-color: var(--primary-bg-color);
+    --listbox-collapsed-bg-color-hover: var(--primary-bg-color-hover);
     --listbox-collapsed-icon-size: var(--size20);
     --listbox-collapsed-icon-size-hover: var(--size20);
     --listbox-collapsed-icon-fill: var(--primary-icon-fill);
@@ -325,6 +347,7 @@ const css = csjs`
     --listbox-collapsed-listbox-icon-fill: var(--color-blue);
     --listbox-collapsed-listbox-icon-fill-hover: var(--color-yellow);
     /*-- expanded ---*/
+    --listbox-expanded-bg-color: var(--current-bg-color);
     --listbox-expanded-icon-size: var(--size20);
     --listbox-expanded-icon-size-hover: var(--size20);
     --listbox-expanded-icon-fill: var(--color-light-green);

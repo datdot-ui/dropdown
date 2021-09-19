@@ -23,6 +23,26 @@ function demo () {
             button: {
                 name: 'terminal',
                 // select: {name: 'star'}
+                theme: {
+                    props: {
+                        listbox_collapsed_bg_color: 'var(--color-greyA2)',
+                        listbox_collapsed_bg_color_hover: 'var(--color-white)',
+                        listbox_collapsed_listbox_size: 'var(--size30)',
+                        listbox_collapsed_listbox_color: 'var(--color-white)',
+                        listbox_collapsed_listbox_color_hover: 'var(--color-blue)',
+                        listbox_collapsed_listbox_icon_fill: 'var(--color-white)',
+                        listbox_collapsed_icon_fill_hover: 'var(--color-green)',
+                        listbox_expanded_listbox_color: 'var(--color-orange)',
+                        listbox_expanded_listbox_icon_fill: 'var(--color-black)',
+                        listbox_expanded_icon_fill: 'var(--color-blue)',
+                        listbox_expanded_bg_color: 'var(--color-white)'
+                    },
+                    grid: {
+                        auto: {
+                            auto_flow: 'row'
+                        }
+                    }
+                }
             },
             list: {
                 name: 'terminal-selector',
@@ -30,9 +50,9 @@ function demo () {
                     {
                         text: 'Compact messages',
                         icon: {name: 'plus'},
-                        cover: 'https://cdn.pixabay.com/photo/2021/08/07/08/49/building-6528075_960_720.jpg'
+                        cover: 'https://cdn.pixabay.com/photo/2021/08/07/08/49/building-6528075_960_720.jpg',
                         // current: true,
-                        // selected: false
+                        // selected: false,
                     },
                     {
                         text: 'Comfortable messages',
@@ -309,6 +329,8 @@ const css = csjs`
     --current-list-avatar-height: var(--primary-list-avatar-height);
     /* role listbox settings ---------------------------------------------*/
     /*-- collapsed --*/
+    --listbox-collapsed-bg-color: var(--primary-bg-color);
+    --listbox-collapsed-bg-color-hover: var(--primary-bg-color-hover);
     --listbox-collapsed-icon-size: var(--size20);
     --listbox-collapsed-icon-size-hover: var(--size20);
     --listbox-collapsed-icon-fill: var(--primary-icon-fill);
@@ -326,6 +348,7 @@ const css = csjs`
     --listbox-collapsed-listbox-icon-fill: var(--color-blue);
     --listbox-collapsed-listbox-icon-fill-hover: var(--color-yellow);
     /*-- expanded ---*/
+    --listbox-expanded-bg-color: var(--current-bg-color);
     --listbox-expanded-icon-size: var(--size20);
     --listbox-expanded-icon-size-hover: var(--size20);
     --listbox-expanded-icon-fill: var(--color-light-green);
@@ -1814,7 +1837,7 @@ function i_button (option, protocol) {
         const option = make_element({name: 'span', classlist: 'option'})
         // check icon, img and body if has value
         const add_cover = typeof cover === 'string' ? avatar : undefined
-        const add_text = body && typeof body === 'string' ? text : body
+        const add_text = body && typeof body === 'string' ? text : 'undefined'
         if (typeof cover === 'string') avatar.append(make_img({src: cover, alt: name}))
         if (typeof cover === 'object') send(make({type: 'error', data: `cover[${typeof cover}] must to be a string`}))
         if (typeof body === 'object') send(make({type: 'error', data: {body: `content is an ${typeof body}`, content: body }}))
@@ -2030,6 +2053,7 @@ function i_button (option, protocol) {
         list_selected_icon_fill, list_selected_icon_fill_hover,
         // role === listbox ----------------------------------//
         // collapsed settings
+        listbox_collapsed_bg_color, listbox_collapsed_bg_color_hover,
         listbox_collapsed_icon_size, listbox_collapsed_icon_size_hover,
         listbox_collapsed_icon_fill, listbox_collapsed_icon_fill_hover, 
         listbox_collapsed_listbox_color, listbox_collapsed_listbox_color_hover,
@@ -2039,11 +2063,12 @@ function i_button (option, protocol) {
         listbox_collapsed_listbox_icon_fill, listbox_collapsed_listbox_icon_fill_hover,
         listbox_collapsed_listbox_avatar_width, listbox_collapsed_listbox_avatar_height,
         // expanded settings
+        listbox_expanded_bg_color,
+        listbox_expanded_icon_size, 
+        listbox_expanded_icon_fill,
         listbox_expanded_listbox_color,
         listbox_expanded_listbox_size, 
         listbox_expanded_listbox_weight,
-        listbox_expanded_icon_size, 
-        listbox_expanded_icon_fill,
         listbox_expanded_listbox_avatar_width, 
         listbox_expanded_listbox_avatar_height,
         listbox_expanded_listbox_icon_size, 
@@ -2161,11 +2186,13 @@ function i_button (option, protocol) {
         --color: ${listbox_collapsed_listbox_color ? listbox_collapsed_listbox_color : 'var(--listbox-collapsed-listbox-color)'};
         --size: ${listbox_collapsed_listbox_size ? listbox_collapsed_listbox_size : 'var(--listbox-collapsed-listbox-size)'};
         --weight: ${listbox_collapsed_listbox_weight ? listbox_collapsed_listbox_weight : 'var(--listbox-collapsed-listbox-weight)'};
+        --bg-color: ${listbox_collapsed_bg_color ? listbox_collapsed_bg_color : 'var(--listbox-collapsed-bg-color)'};
     }
     :host(i-button[role="listbox"]:hover) {
         --color: ${listbox_collapsed_listbox_color_hover ? listbox_collapsed_listbox_color_hover : 'var(--listbox-collapsed-listbox-color-hover)'};
         --size: ${listbox_collapsed_listbox_size_hover ? listbox_collapsed_listbox_size_hover : 'var(--listbox-collapsed-listbox-size-hover)'};
         --weight: ${listbox_collapsed_listbox_weight_hover ? listbox_collapsed_listbox_weight_hover : 'var(--listbox-collapsed-listbox-weight-hover)'};
+        --bg-color: ${listbox_collapsed_bg_color_hover ? listbox_collapsed_bg_color_hover : 'var(--listbox-collapsed-bg-color-hover)'};
     }
     :host(i-button[role="listbox"]) > .icon {
         ${grid.icon ? make_grid(grid.icon) : make_grid({column: '2'})}
@@ -2177,9 +2204,10 @@ function i_button (option, protocol) {
     }
     :host(i-button[role="listbox"][aria-expanded="true"]),
     :host(i-button[role="listbox"][aria-expanded="true"]:hover) {
-        --size: ${listbox_expanded_listbox_size ? listbox_expanded_listbox_size : 'var(--listbox-expanded-listbox-size)' };
-        --color: ${listbox_expanded_listbox_color ? listbox_expanded_listbox_color : 'var(--listbox-expanded-listbox-color)' };
-        --weight: ${listbox_expanded_listbox_weight ? listbox_expanded_listbox_weight : 'var(--listbox-expanded-listbox-weight)' };
+        --size: ${listbox_expanded_listbox_size ? listbox_expanded_listbox_size : 'var(--listbox-expanded-listbox-size)'};
+        --color: ${listbox_expanded_listbox_color ? listbox_expanded_listbox_color : 'var(--listbox-expanded-listbox-color)'};
+        --weight: ${listbox_expanded_listbox_weight ? listbox_expanded_listbox_weight : 'var(--listbox-expanded-listbox-weight)'};
+        --bg-color: ${listbox_expanded_bg_color ? listbox_expanded_bg_color : 'var(--listbox-expanded-bg-color)'}
     }
     :host(i-button[role="listbox"][aria-expanded="true"]) .avatar {
         --avatar-width: ${listbox_expanded_listbox_avatar_width ? listbox_expanded_listbox_avatar_width : 'var(--listbox-expanded-listbox-avatar-width)'};
@@ -3404,7 +3432,7 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
                     select: button.select ? button.select : undefined,
                     icon: obj.icon,
                 },
-                cover: obj.cover
+                cover: obj.cover,
             }
         })
         store_data.push(init_selected)
@@ -3414,13 +3442,12 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
             if (item.selected) store_data.push(item)
         })
     }
-
     function widget () {
         const send = protocol(get)
         const dropdown = document.createElement('i-dropdown')
         const shadow = dropdown.attachShadow({mode: 'closed'})
-        const i_button = make_button({page, option: mode === 'single-select' ? init_selected : options.button, mode, expanded: is_expanded}, dropdown_protocol)
-        const i_list = make_list({page, option: options.list, mode, hidden: is_expanded}, dropdown_protocol)
+        const i_button = make_button({page, option: mode === 'single-select' ? init_selected : button, mode, expanded: is_expanded, theme: button.theme}, dropdown_protocol)
+        const i_list = make_list({page, option: list, mode, hidden: is_expanded}, dropdown_protocol)
         send(message)
         dropdown.setAttribute('aria-label', name)
         if (is_disabled) dropdown.setAttribute('disabled', is_disabled)
@@ -3433,7 +3460,7 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
             // trigger expanded event via document.body
             document.body.addEventListener('click', (e)=> {
                 const type = 'collapsed'
-                const to = `${options.button ? options.button.name : name} / listbox / ui-list`
+                const to = `${button ? button.name : name} / listbox / ui-list`
                 if (e.target !== dropdown) {
                     if (is_expanded) {
                         is_expanded = !is_expanded
@@ -3582,27 +3609,12 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
 },{"make-button":45,"make-list":46,"message-maker":47,"support-style-sheet":48}],45:[function(require,module,exports){
 const {i_button} = require('datdot-ui-button')
 module.exports = make_button
-function make_button ({page, option = {}, mode, expanded}, protocol) {
-    const {flow = 'ui-dropdown', name, role = 'listbox', body, icons, cover, disabled = false, theme = {}} = option
-    const { 
-        style = `
-        :host(i-button) > .icon {
-            transform: rotate(0deg);
-            transition: transform 0.4s ease-in-out;
-        }
-        :host(i-button[aria-expanded="true"]) > .icon {
-            transform: rotate(${mode === 'single-select' ? '-180' : '0' }deg);
-        }
-        `
-        ,
-        props = {
-            opacity: '1'
-        },
-        grid = {}
-    } = theme
-
+function make_button ({page, option = {}, mode, expanded, theme = {}}, protocol) {
+    const {flow = 'ui-dropdown', name, role = 'listbox', body, icons, cover, disabled = false} = option
     const match = mode.match(/single|multiple/)
     const button_mode = match ? 'selector' : 'menu'
+    const {style = ``, props = {}, grid = {}} = theme
+
     return i_button({
         page,
         flow, 
@@ -3613,7 +3625,20 @@ function make_button ({page, option = {}, mode, expanded}, protocol) {
         cover, 
         mode: button_mode, 
         expanded, disabled, 
-        theme: {style, props, grid}
+        theme: {
+            style: `
+                :host(i-button) > .icon {
+                    transform: rotate(0deg);
+                    transition: transform 0.4s ease-in-out;
+                }
+                :host(i-button[aria-expanded="true"]) > .icon {
+                    transform: rotate(${mode === 'single-select' ? '-180' : '0' }deg);
+                }
+                ${style}
+            `,
+            props,
+            grid
+        }
     }, protocol(name))
 }
 

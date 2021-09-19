@@ -24,7 +24,7 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
                     select: button.select ? button.select : undefined,
                     icon: obj.icon,
                 },
-                cover: obj.cover
+                cover: obj.cover,
             }
         })
         store_data.push(init_selected)
@@ -34,13 +34,12 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
             if (item.selected) store_data.push(item)
         })
     }
-
     function widget () {
         const send = protocol(get)
         const dropdown = document.createElement('i-dropdown')
         const shadow = dropdown.attachShadow({mode: 'closed'})
-        const i_button = make_button({page, option: mode === 'single-select' ? init_selected : options.button, mode, expanded: is_expanded}, dropdown_protocol)
-        const i_list = make_list({page, option: options.list, mode, hidden: is_expanded}, dropdown_protocol)
+        const i_button = make_button({page, option: mode === 'single-select' ? init_selected : button, mode, expanded: is_expanded, theme: button.theme}, dropdown_protocol)
+        const i_list = make_list({page, option: list, mode, hidden: is_expanded}, dropdown_protocol)
         send(message)
         dropdown.setAttribute('aria-label', name)
         if (is_disabled) dropdown.setAttribute('disabled', is_disabled)
@@ -53,7 +52,7 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
             // trigger expanded event via document.body
             document.body.addEventListener('click', (e)=> {
                 const type = 'collapsed'
-                const to = `${options.button ? options.button.name : name} / listbox / ui-list`
+                const to = `${button ? button.name : name} / listbox / ui-list`
                 if (e.target !== dropdown) {
                     if (is_expanded) {
                         is_expanded = !is_expanded
