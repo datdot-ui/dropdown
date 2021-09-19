@@ -44,23 +44,21 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
         dropdown.setAttribute('aria-label', name)
         if (is_disabled) dropdown.setAttribute('disabled', is_disabled)
         style_sheet(shadow, style)
-        handle_expanded()
+        handle_collapsed()
         shadow.append(i_button)
+        // need to add this to avoid document.body.addEventListener('click)
+        dropdown.onclick = event => event.stopPropagation()
         return dropdown
 
-        function handle_expanded () {
+        function handle_collapsed () {
             // trigger expanded event via document.body
             document.body.addEventListener('click', (e)=> {
                 const type = 'collapsed'
                 const to = `${button ? button.name : name} / listbox / ui-list`
-                if (e.target !== dropdown) {
-                    if (is_expanded) {
-                        is_expanded = !is_expanded
-                        recipients[button.name]( make({to, type, data: is_expanded}) )
-                        recipients[list.name]( make({type, data: !is_expanded}) )
-                        send( make({to, type, data: {selected: store_data}}) )
-                    }
-                }
+                is_expanded = false
+                recipients[button.name]( make({to, type, data: is_expanded}) )
+                recipients[list.name]( make({type, data: !is_expanded}) )
+                send( make({to, type, data: {selected: store_data}}) )
             })
         }
         function handle_change_event (content) {

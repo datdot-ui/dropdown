@@ -159,11 +159,10 @@ function demo () {
         dropdowns.forEach( item => {
             const name = item.getAttribute('aria-label')
             const to = `${name} / listbox / ui-list`
+            item.style.zIndex = '99'
             if (name !== from) {
-                recipients[name]( make({to, type: 'collapsed', data}) )
+                recipients[name]( make({to, type: 'collapsed', data: {name, expanded: !state}}) )
                 item.removeAttribute('style')
-            } else {
-                item.style.zIndex = '99'
             }
         })
     }
