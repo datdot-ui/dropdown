@@ -349,7 +349,6 @@ const css = csjs`
     /*-- expanded ---*/
     --listbox-expanded-bg-color: var(--current-bg-color);
     --listbox-expanded-icon-size: var(--size20);
-    --listbox-expanded-icon-size-hover: var(--size20);
     --listbox-expanded-icon-fill: var(--color-light-green);
     --listbox-expanded-listbox-size: var(--size20);
     --listbox-expanded-listbox-weight: var(--primary-weight);
