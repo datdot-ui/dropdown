@@ -3462,10 +3462,12 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
                 const make = message_maker(`All`)
                 const to = `${name} / ${flow} / ${page}`
                 const type = 'collapsed'
-                is_expanded = false
-                recipients[name]( make({type, data: is_expanded}) )
-                recipients[list_name]( make({type, data: !is_expanded}) )
-                send( make({to, type, data: {selected: store_data}}) )
+                if (is_expanded) {
+                    is_expanded = false
+                    recipients[name]( make({type, data: is_expanded}) )
+                    recipients[list_name]( make({type, data: !is_expanded}) )
+                    send( make({to, type, data: {selected: store_data}}) )
+                }
             })
         }
         function handle_change_event (content) {
