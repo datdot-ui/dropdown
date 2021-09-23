@@ -480,12 +480,18 @@ document.body.append(demo())
 },{"..":44,"../src/node_modules/message-maker":47,"bel":4,"csjs-inject":7,"datdot-terminal":24,"datdot-ui-icon":35,"head":2}],2:[function(require,module,exports){
 module.exports = head
 
-function head (lang = 'utf8', title = 'Dropdown - DatDot UI') {
+function head (lang = 'UTF-8', title = 'Dropdown - DatDot UI') {
+    document.documentElement.lang = 'en'
     document.title = title
-    const meta = document.createElement('meta')
-    meta.setAttribute('name', 'viewport')
-    meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0')
-    document.head.appendChild(meta)
+    const lan = document.createElement('meta')
+    const viewport = document.createElement('meta')
+    const description = document.createElement('meta')
+    lan.setAttribute('charset', lang)
+    viewport.setAttribute('name', 'viewport')
+    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0')
+    description.setAttribute('name', 'description')
+    description.setAttribute('content', 'Datdot-UI is a web component and the widgets for datdot.org using.')
+    document.head.append(lan, viewport)
 }
 },{}],3:[function(require,module,exports){
 var trailingNewlineRegex = /\n[\s]+$/
