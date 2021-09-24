@@ -488,7 +488,7 @@ function head (lang = 'UTF-8', title = 'Dropdown - DatDot UI') {
     const description = document.createElement('meta')
     lan.setAttribute('charset', lang)
     viewport.setAttribute('name', 'viewport')
-    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0')
+    viewport.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no')
     description.setAttribute('name', 'description')
     description.setAttribute('content', 'Datdot-UI is a web component and the widgets for datdot.org using.')
     document.head.append(lan, viewport)
