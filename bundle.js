@@ -281,8 +281,10 @@ const css = csjs`
     --primary-weight-hover: 300;
     --primary-color: var(--color-black);
     --primary-color-hover: var(--color-white);
+    --primary-color-focus: var(--color-orange);
     --primary-bg-color: var(--color-white);
     --primary-bg-color-hover: var(--color-black);
+    --primary-bg-color-focus: var(--color-greyA2), 0.5;
     --primary-border-width: 1px;
     --primary-border-style: solid;
     --primary-border-color: var(--color-black);
@@ -420,10 +422,17 @@ body {
 }
 .wrap {
     display: grid;
-    ${make_grid({rows: '1fr 200px', areas: ["container", "terminal"]})}
+    ${make_grid({rows: 'minmax(0, 1fr) 200px', areas: ["container", "terminal"]})}
     height: 100%;
 }
-.content {}
+.container {
+    grid-area: container;
+    overflow: hidden scroll;
+    height: 100%;
+}
+.content {
+    padding: 2% 5%;
+}
 .text, .icon {
     display: flex;
 }
@@ -441,19 +450,6 @@ body {
 }
 .example:last-child {
     margin-top: 100px;
-}
-@media (max-width: 768px) {
-    [data-state="debug"] {
-        grid-template-rows: 65% 35%;
-        grid-template-columns: auto;
-    }
-    [data-state="debug"] i-log {
-        position: inherit;
-        width: 100%;
-    }
-    .container {
-        grid-template-rows: 80px auto;
-    }
 }
 `
 
