@@ -6,11 +6,12 @@ const terminal = require('datdot-terminal')
 const icon = require('datdot-ui-icon')
 const dropdown = require('..')
 const message_maker = require('../src/node_modules/message-maker')
+const make_grid = require('../src/node_modules/make-grid')
 
 function demo () {
     const recipients = []
     const make = message_maker('dropdown-ui / demo') 
-    const logs = terminal({mode: 'comfortable', expanded: false}, protocol('logs'))
+    const logs = terminal({mode: 'compact', expanded: false}, protocol('logs'))
     const single_select_option = 
     {
         page: 'PLAN',
@@ -144,7 +145,7 @@ function demo () {
         </aside>
     </div>`
     const container = bel`<div class="${css.container}">${content}</div>`
-    const app = bel`<div class="${css.wrap}" data-state="debug">${container}${logs}</div>`
+    const app = bel`<div class="${css.wrap}">${container}${logs}</div>`
 
     return app
 
@@ -331,8 +332,8 @@ const css = csjs`
     --listbox-collapsed-icon-size-hover: var(--size14);
     --listbox-collapsed-icon-fill: var(--primary-icon-fill);
     --listbox-collapsed-icon-fill-hover: var(--primary-icon-fill-hover);
-    --listbox-collapsed-listbox-size: var(--primary-size);
-    --listbox-collapsed-listbox-size-hover: var(--primary-size-hover);
+    --listbox-collapsed-listbox-size: 12px;
+    --listbox-collapsed-listbox-size-hover: 12px;
     --listbox-collapsed-listbox-weight: var(--primary-weight);
     --listbox-collapsed-listbox-weight-hover: var(--primary-weight);
     --listbox-collapsed-listbox-color: var(--primary-color);
@@ -418,6 +419,8 @@ body {
 }
 .wrap {
     display: grid;
+    ${make_grid({rows: '1fr 200px', areas: ["container", "terminal"]})}
+    height: 100%;
 }
 .content {}
 .text, .icon {
@@ -429,33 +432,11 @@ body {
 .icon i-button {
     margin-right: 10px;
 }
-[data-state="view"] {
-    height: 100%;
-}
-[data-state="view"] i-log {
-    display: none;
-}
-[data-state="debug"] {
-    grid-template-rows: auto;
-    grid-template-columns: 62% auto;
-    height: 100%;
-}
-[data-state="debug"] i-log {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 40%;
-    height: 100%;
-}
 .container {
-    display: grid;
-    grid-template-rows: min-content;
-    grid-template-columns: 90%;
-    justify-content: center;
-    align-items: start;
+    grid-area: container;
     background-color: var(--color-white);
     height: 100%;
-    overflow: hidden auto;
+    overflow: hidden scroll;
 }
 .example:last-child {
     margin-top: 100px;
