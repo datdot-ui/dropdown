@@ -284,7 +284,7 @@ const css = csjs`
     --primary-color-focus: var(--color-orange);
     --primary-bg-color: var(--color-white);
     --primary-bg-color-hover: var(--color-black);
-    --primary-bg-color-focus: var(--color-greyA2), 0.5;
+    --primary-bg-color-focus: var(--color-greyA2), 1;
     --primary-border-width: 1px;
     --primary-border-style: solid;
     --primary-border-color: var(--color-black);
