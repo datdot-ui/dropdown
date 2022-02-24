@@ -33,7 +33,7 @@ function demo () {
         inbox[head.join('/')] = msg                  // store msg
         const [from] = head
         // send back ack
-        const { notify: from_notify, address: from_address, make: from_make } = names[from]
+        const { notify: from_notify, address: from_address, make: from_make } = recipients[from]
         from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
         // handle
         const { notify: log_notify, address: log_address, make: log_make } = recipients['parent']
