@@ -4580,7 +4580,7 @@ function make_list ({page, name, option = {}, mode, hidden}, parent_protocol) {
     render_list.filter( item => {
         if (item.selected) return store_selected.push(item.text)
     })
-    return i_list({page, flow, name, role, body: render_list, mode, hidden, expanded: !hidden, theme}, protocol(name))
+    return i_list({page, flow, name, role, body: render_list, mode, hidden, expanded: !hidden, theme}, make_protocol(name))
 
     function make_single_select (args) {
         return args.map((opt, index) => {
