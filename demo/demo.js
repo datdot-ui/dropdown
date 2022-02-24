@@ -5,13 +5,41 @@ const csjs = require('csjs-inject')
 const terminal = require('datdot-terminal')
 const icon = require('datdot-ui-icon')
 const dropdown = require('..')
-const message_maker = require('../src/node_modules/message-maker')
+const message_maker = require('message-maker')
 const make_grid = require('../src/node_modules/make-grid')
 
+var id = 0
+
 function demo () {
-    const recipients = []
-    const make = message_maker('dropdown-ui / demo') 
-    const logs = terminal({mode: 'compact', expanded: false}, protocol('logs'))
+// ------------------------------
+    const myaddress = `${__filename}-${id++}`
+    const inbox = {}
+    const outbox = {}
+    const recipients = {}
+    const names = {}
+    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
+
+    function make_protocol (name) {
+        return function protocol (address, notify) {
+            names[address] = recipients[name] = { name, address, notify, make: message_maker(myaddress) }
+            return { notify: listen, address: myaddress }
+        }
+    }
+    function listen (msg) {
+        console.log('New message', { msg })
+        const { head, refs, type, data, meta } = msg // receive msg
+        inbox[head.join('/')] = msg                  // store msg
+        const [from] = head
+        // send back ack
+        const { notify: from_notify, address: from_address, make: from_make } = recipients[from]
+        from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
+        // handle
+        const { notify: log_notify, address: log_address, make: log_make } = recipients['parent']
+        log_notify(log_make({ to: log_address, type, data }))
+        if (type === 'click') return handle_dropdown_menu_event(from, data)
+    }
+// ------------------------------
+    const logs = terminal({mode: 'compact', expanded: false}, make_protocol('logs'))
     const single_select_option = 
     {
         page: 'PLAN',
@@ -133,15 +161,15 @@ function demo () {
         <h1>Dropdown</h1>
         <aside class="${css.example}">
             <h2>menu</h2>
-            ${dropdown(dropdown_up_option, protocol(dropdown_up_option.name))}
+            ${dropdown(dropdown_up_option, make_protocol(dropdown_up_option.name))}
         </aside>
         <aside class="${css.example}">
             <h2>Single select</h2>
-            ${dropdown(single_select_option, protocol(single_select_option.name))}
+            ${dropdown(single_select_option, make_protocol(single_select_option.name))}
         </aside>
         <aside class="${css.example}">
             <h2>Mutiple select</h2>
-            ${dropdown(multiple_select_option, protocol(multiple_select_option.name))}
+            ${dropdown(multiple_select_option, make_protocol(multiple_select_option.name))}
         </aside>
     </div>`
     const container = bel`<div class="${css.container}">${content}</div>`
@@ -164,20 +192,6 @@ function demo () {
                 item.removeAttribute('style')
             }
         })
-    }
-
-    function protocol (name) {
-        return send => {
-            recipients[name] = send
-            return get
-        }
-    }
-
-    function get (msg) {
-        const {head, refs, type, data} = msg 
-        const from = head[0].split('/')[0].trim()
-        recipients['logs'](msg)
-        if (type === 'click') return handle_dropdown_menu_event(from, data)
     }
 }
 

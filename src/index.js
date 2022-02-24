@@ -1,17 +1,46 @@
 const style_sheet = require('support-style-sheet')
 const message_maker = require('message-maker')
-const make_button = require('make-button')
+const i_button = require('datdot-ui-button')
 const make_list = require('make-list')
+
+var id = 0
 
 module.exports = i_dropdown
 
-function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expanded = false, disabled = false, mode = 'single-select', theme}, protocol) {
-    const {button = {}, list = {}} = options
-    const recipients = []
-    const make = message_maker(`${name} / ${flow} / ${page}`)
-    const message = make({type: 'ready'})
-    const list_name = `${name}-list`
+function i_dropdown (opts, parent_protocol) {
+// -----------------------------------------
+    const myaddress = `${__filename}-${id++}`
+    const inbox = {}
+    const outbox = {}
+    const recipients = {}
+    const names = {}
+    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
 
+    const {notify, address} = parent_protocol(myaddress, listen)
+    names[address] = recipients['parent'] = { name: 'parent', notify, address, make: message_maker(myaddress) }
+    notify(recipients['parent'].make({ to: address, type: 'ready', refs: {} }))
+
+    function make_protocol (name) {
+        return function protocol (address, notify) {
+            names[address] = recipients[name] = { name, address, notify, make: message_maker(myaddress) }
+            return { notify: listen, address: myaddress }
+        }
+    }
+    
+    function listen (msg) {
+        const { head, refs, type, data, meta } = msg // receive msg
+        inbox[head.join('/')] = msg                  // store msg
+        const [from, to, msg_id] = head
+        console.log('New message', { from, msg })
+        // handle
+        const { notify, address, make } = recipients['parent']
+        notify({ to: address, type, data })
+        if (type.match(/expanded|collapsed/)) return handle_expanded_event( data)
+        if (type.match(/selected/)) return handle_select_event(data)
+    }
+// -----------------------------------------
+    const {page = '*', flow = 'ui-dropdown', name, options: {button = {}, list = {}}, expanded = false, disabled = false, mode = 'single-select', theme} = opts
+    const list_name = `${name}-list`
     let is_expanded = expanded
     let is_disabled = disabled
     let store_data = []
@@ -37,12 +66,34 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
         })
     }
     function widget () {
-        const send = protocol(get)
         const dropdown = document.createElement('i-dropdown')
         const shadow = dropdown.attachShadow({mode: 'closed'})
-        const i_button = make_button({page, name, option: mode === 'single-select' ? init_selected : button, mode, expanded: is_expanded, theme: button.theme}, dropdown_protocol)
-        const i_list = make_list({page, name: list_name, option: list, mode, hidden: is_expanded}, dropdown_protocol)
-        send(message)
+        i_button({ 
+            name, 
+            role: 'listbox', 
+            body, 
+            icons, 
+            cover, 
+            mode: mode.match(/single|multiple/) ? 'selector' : 'menu', 
+            expanded: is_expanded, 
+            disabled, 
+            theme: {
+                style: `
+                    :host(i-button) > .icon {
+                        transform: rotate(0deg);
+                        transition: transform 0.4s ease-in-out;
+                    }
+                    :host(i-button[aria-expanded="true"]) > .icon {
+                        transform: rotate(${mode === 'single-select' ? '-180' : '0' }deg);
+                    }
+                    ${style}
+                `,
+                props,
+                grid
+            }
+        }, make_protocol(name))
+        const i_list = make_list({page, name: list_name, option: list, mode, hidden: is_expanded}, make_protocol('list'))
+        // notify(message)
         dropdown.setAttribute('aria-label', name)
         if (is_disabled) dropdown.setAttribute('disabled', is_disabled)
         style_sheet(shadow, style)
@@ -55,21 +106,24 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
         function handle_collapsed () {
             // trigger expanded event via document.body
             document.body.addEventListener('click', (e)=> {
-                const make = message_maker(`All`)
-                const to = `${name} / ${flow} / ${page}`
                 const type = 'collapsed'
                 if (is_expanded) {
                     is_expanded = false
-                    recipients[name]( make({type, data: is_expanded}) )
-                    recipients[list_name]( make({type, data: !is_expanded}) )
-                    send( make({to, type, data: {selected: store_data}}) )
+                    const { name: name_notify, make: name_make, address: name_address } = recipients[name]
+                    name_notify(name_make({ to: name_address, type, data: is_expanded }))
+                    const { notify: list_notify, make: list_make, address: list_address } = recipients[list_name]
+                    list_notify(list_make({ to: list_address, type, data: !is_expanded }))
+                    const { notify, make, address } = recipients['parent']
+                    notify(make({to: address, type, data: { selected: store_data }}) )
                 }
             })
         }
         function handle_change_event (content) {
-            const msg = make({type: 'changed', data: content})
-            recipients[name](msg)
-            send(msg)
+            const { notify: name_notify, make: name_make, address: name_address } = recipients[name]
+            name_notify(name_make({ to: name_address, type: 'changed', data: content }))
+            
+            const { notify, make, address } = recipients['parent']
+            notify(make({ to: address, type: 'changed', data: content }))
         }
         function handle_select_event (data) {
             const {mode, selected} = data
@@ -94,26 +148,16 @@ function i_dropdown ({page = '*', flow = 'ui-dropdown', name, options = {}, expa
             is_expanded = expanded
             const type = is_expanded ? 'expanded' : 'collapsed'
             // check which one dropdown is not using then do collapsed
+            const { notify: name_notify, make: name_make, address: name_address } = recipients[name]
+            const { notify: list_notify, make: list_make, address: list_address } = recipients[list_name]
             if (from !== name) {
-                recipients[name](make({type: 'collapsed', data: is_expanded}))
-                recipients[list_name](make({type, data: !is_expanded}))
+                name_notify(name_make({ to: name_address,type: 'collapsed', data: is_expanded }))
+                list_notify(list_make({ to: list_address, type, data: !is_expanded }))
             }
             // check which dropdown is currently using then do expanded
-            recipients[name](make({type, data: is_expanded}))
-            recipients[list_name](make({type, data: !is_expanded}))
+            name_notify(name_make({ to: name_address, type, data: is_expanded }))
+            list_notify(list_make({ to: list_address, type, data: !is_expanded }))
             if (is_expanded && from == name) shadow.append(i_list)
-        }
-        function dropdown_protocol (name) {
-            return send => {
-                recipients[name] = send
-                return get
-            }
-        }
-        function get (msg) {
-            const {head, refs, type, data} = msg 
-            send(msg)
-            if (type.match(/expanded|collapsed/)) return handle_expanded_event( data)
-            if (type.match(/selected/)) return handle_select_event(data)
         }
     }
 
