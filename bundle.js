@@ -33,7 +33,7 @@ function demo () {
         inbox[head.join('/')] = msg                  // store msg
         const [from] = head
         // send back ack
-        const { notify: from_notify, address: from_address, make: from_make } = recipients[from]
+        const { notify: from_notify, address: from_address, make: from_make } = names[from]
         from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
         // handle
         const { notify: log_notify, address: log_address, make: log_make } = recipients['parent']
@@ -4324,7 +4324,7 @@ function i_dropdown (opts, parent_protocol) {
         console.log('New message', { from, msg })
         // handle
         const { notify, address, make } = recipients['parent']
-        notify({ to: address, type, data })
+        notify(make({ to: address, type, data }))
         if (type.match(/expanded|collapsed/)) return handle_expanded_event( data)
         if (type.match(/selected/)) return handle_select_event(data)
     }
@@ -4361,12 +4361,9 @@ function i_dropdown (opts, parent_protocol) {
         i_button({ 
             name, 
             role: 'listbox', 
-            body, 
-            icons, 
-            cover, 
             mode: mode.match(/single|multiple/) ? 'selector' : 'menu', 
             expanded: is_expanded, 
-            disabled, 
+            disabled: is_disabled, 
             theme: {
                 style: `
                     :host(i-button) > .icon {
@@ -4378,8 +4375,8 @@ function i_dropdown (opts, parent_protocol) {
                     }
                     ${style}
                 `,
-                props,
-                grid
+                props: {},
+                grid: {}
             }
         }, make_protocol(name))
         const i_list = make_list({page, name: list_name, option: list, mode, hidden: is_expanded}, make_protocol('list'))
@@ -4543,6 +4540,7 @@ arguments[4][27][0].apply(exports,arguments)
 },{"dup":27}],55:[function(require,module,exports){
 (function (__filename){(function (){
 const i_list = require('datdot-ui-list')
+const message_maker = require('message-maker')
 
 var id = 0
 
@@ -4630,6 +4628,6 @@ function make_list ({page, name, option = {}, mode, hidden}, parent_protocol) {
     }
 }
 }).call(this)}).call(this,"/src/node_modules/make-list.js")
-},{"datdot-ui-list":45}],56:[function(require,module,exports){
+},{"datdot-ui-list":45,"message-maker":49}],56:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
 },{"dup":29}]},{},[1]);
