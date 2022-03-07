@@ -31,104 +31,98 @@ function demo () {
         inbox[head.join('/')] = msg                  // store msg
         const [from] = head
         // send back ack
-        const { notify: from_notify, address: from_address, make: from_make } = recipients[from]
-        from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
+        // const { notify: from_notify, address: from_address, make: from_make } = names[from]
+        // from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
         // handle
-        const { notify: log_notify, address: log_address, make: log_make } = recipients['parent']
+        const { notify: log_notify, address: log_address, make: log_make } = recipients['logs']
         log_notify(log_make({ to: log_address, type, data }))
         if (type === 'click') return handle_dropdown_menu_event(from, data)
     }
 // ------------------------------
     const logs = terminal({mode: 'compact', expanded: false}, make_protocol('logs'))
-    const single_select_option = 
+    const single_select_opts = 
     {
-        page: 'PLAN',
         name: 'terminal',
-        mode : 'single-select',
+        mode: 'listbox-single',
         expanded: false,
         disabled: false,
-        options: {
-            button: {
-                // select: {name: 'star'}
-                theme: {
-                    props: {
-                        listbox_collapsed_bg_color: 'var(--color-greyA2)',
-                        listbox_collapsed_bg_color_hover: 'var(--color-white)',
-                        listbox_collapsed_listbox_size: 'var(--size30)',
-                        listbox_collapsed_listbox_color: 'var(--color-white)',
-                        listbox_collapsed_listbox_color_hover: 'var(--color-blue)',
-                        listbox_collapsed_listbox_icon_fill: 'var(--color-white)',
-                        listbox_collapsed_icon_fill_hover: 'var(--color-green)',
-                        listbox_expanded_listbox_color: 'var(--color-orange)',
-                        listbox_expanded_listbox_icon_fill: 'var(--color-black)',
-                        listbox_expanded_icon_fill: 'var(--color-blue)',
-                        listbox_expanded_bg_color: 'var(--color-white)'
-                    },
-                    grid: {
-                        auto: {
-                            auto_flow: 'row'
-                        }
+        button: {
+            // select: {name: 'star'}
+            theme: {
+                props: {
+                    listbox_collapsed_bg_color: 'var(--color-greyA2)',
+                    listbox_collapsed_bg_color_hover: 'var(--color-white)',
+                    listbox_collapsed_listbox_size: 'var(--size30)',
+                    listbox_collapsed_listbox_color: 'var(--color-white)',
+                    listbox_collapsed_listbox_color_hover: 'var(--color-blue)',
+                    listbox_collapsed_listbox_icon_fill: 'var(--color-white)',
+                    listbox_collapsed_icon_fill_hover: 'var(--color-green)',
+                    listbox_expanded_listbox_color: 'var(--color-orange)',
+                    listbox_expanded_listbox_icon_fill: 'var(--color-black)',
+                    listbox_expanded_icon_fill: 'var(--color-blue)',
+                    listbox_expanded_bg_color: 'var(--color-white)'
+                },
+                grid: {
+                    auto: {
+                        auto_flow: 'row'
                     }
                 }
-            },
-            list: {
-                array: [
-                    {
-                        text: 'Compact messages',
-                        icon: {name: 'plus'},
-                        cover: 'https://cdn.pixabay.com/photo/2021/08/07/08/49/building-6528075_960_720.jpg',
-                        // current: true,
-                        // selected: false,
-                    },
-                    {
-                        text: 'Comfortable messages',
-                        icon: {name: 'edit'},
-                        cover: 'https://cdn.pixabay.com/photo/2021/08/23/12/41/foxtail-6567731_960_720.jpg'
-                        // current: true,
-                        // selected: true
-                    }
-                ] 
             }
-        }
+        },
+        list: {
+            array: [
+                {
+                    text: 'Compact messages',
+                    icon: {name: 'plus'},
+                    cover: 'https://cdn.pixabay.com/photo/2021/08/07/08/49/building-6528075_960_720.jpg',
+                    // current: true,
+                    // selected: false,
+                },
+                {
+                    text: 'Comfortable messages',
+                    icon: {name: 'edit'},
+                    cover: 'https://cdn.pixabay.com/photo/2021/08/23/12/41/foxtail-6567731_960_720.jpg'
+                    // current: true,
+                    // selected: true
+                }
+            ] 
+        },
     }
 
-    const multiple_select_option = 
+    const multiple_select_opt = 
     {
-        page: 'STEPS',
         name: 'filter',
-        mode : 'multiple-select',
+        mode : 'listbox-multi',
         expanded: false,
         disabled: false,
-        options: {
-            button: {
-                body: 'Filter',
-                // mode: 'selector',
-                icons: {
-                    select: {name: 'filter'},
-                    icon: {name: 'edit'}
-                },
-                cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+        button: {
+            body: 'Filter',
+            // mode: 'selector',
+            icons: {
+                select: {name: 'filter'},
+                icon: {name: 'edit'}
             },
-            list: {
-                array: [
-                    {
-                        text: 'Option1',
-                        cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                        list: {name: 'star'},
-                        // selected: false
-                    },
-                    {
-                        text: 'Option2',
-                        list: {name: 'star'},
-                        selected: true
-                    },
-                    {
-                        text: 'Option3',
-                        list: {name: 'star'},
-                        selected: true
-                    }
-                ],
-            }
+            cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+        },
+        list: {
+            array: [
+                {
+                    text: 'Option1',
+                    cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                    list: {name: 'star'},
+                    // selected: false
+                },
+                {
+                    text: 'Option2',
+                    list: {name: 'star'},
+                    selected: true
+                },
+                {
+                    text: 'Option3',
+                    list: {name: 'star'},
+                    selected: true
+                }
+            ],
         },
         theme: {
             props: {
@@ -140,38 +134,41 @@ function demo () {
     const dropdown_up_option = {
         name: 'up-selector',
         expanded: false,
-        options: {
-            button: {
-                name: 'up-selector'
-            },
-            list: {
-                name: 'up-list',
-                direction: 'up',
-                end: '55px',
-                array: [
-                    {text: 'datdot.org', role: 'menuitem'},
-                    {text: 'playproject.io', role: 'menuitem'}
-                ]
-            }
+        button: {
+            name: 'up-selector'
         },
+        list: {
+            name: 'up-list',
+            direction: 'up',
+            end: '55px',
+            array: [
+                { text: 'datdot.org', role: 'menuitem' },
+                { text: 'playproject.io', role: 'menuitem' }
+            ]
+        }
     }
 
-    const content = bel`
-    <div class="${css.content}">
+    const d_up = dropdown(dropdown_up_option, make_protocol(dropdown_up_option.name))
+    const d_single = dropdown(single_select_opts, make_protocol(single_select_opts.name))
+    const d_multi = dropdown(multiple_select_opt, make_protocol(multiple_select_opt.name))
+
+    
+    const content = bel` <div class="${css.content}">
         <h1>Dropdown</h1>
         <aside class="${css.example}">
             <h2>menu</h2>
-            ${dropdown(dropdown_up_option, make_protocol(dropdown_up_option.name))}
+            ${d_up}
         </aside>
         <aside class="${css.example}">
             <h2>Single select</h2>
-            ${dropdown(single_select_option, make_protocol(single_select_option.name))}
+            ${d_single}
         </aside>
         <aside class="${css.example}">
             <h2>Mutiple select</h2>
-            ${dropdown(multiple_select_option, make_protocol(multiple_select_option.name))}
+            ${d_multi}
         </aside>
     </div>`
+
     const container = bel`<div class="${css.container}">${content}</div>`
     const app = bel`<div class="${css.wrap}">${container}${logs}</div>`
 
@@ -182,13 +179,15 @@ function demo () {
         const state = data.expanded
         const type = state ? 'expanded' : 'collapsed'
         const to = `${from} / listbox / ui-list`
-        recipients[from]( make({to, type, data: {from, expanded: state}}) )
+        const { notify: from_notify, address: from_address, make: from_make } =  names[from]
+        from_notify(from_make({to: from_address, type, data: {from, expanded: state}}) )
         dropdowns.forEach( item => {
             const name = item.getAttribute('aria-label')
             const to = `${name} / listbox / ui-list`
             item.style.zIndex = '99'
             if (name !== from) {
-                recipients[name]( make({to, type: 'collapsed', data: {name, expanded: !state}}) )
+                const { notify: name_notify, address: name_address, make: name_make } =  recipients[name]
+                name_notify(name_make({to: name_address, type: 'collapsed', data: {name, expanded: !state}}) )
                 item.removeAttribute('style')
             }
         })
