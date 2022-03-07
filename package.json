@@ -33,6 +33,7 @@
     "datdot-terminal": "git+https://github.com/datdotorg/datdot-terminal.git",
     "datdot-ui-button": "git+https://github.com/datdotorg/datdot-ui-button.git",
     "datdot-ui-icon": "git+https://github.com/datdotorg/datdot-ui-icon.git",
-    "datdot-ui-list": "git+https://github.com/datdotorg/datdot-ui-list.git"
+    "datdot-ui-list": "git+https://github.com/datdotorg/datdot-ui-list.git",
+    "message-maker": "git+https://github.com/datdotorg/message-maker.git"
   }
 }
