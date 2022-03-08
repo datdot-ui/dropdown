@@ -178,19 +178,18 @@ function demo () {
         const dropdowns = document.querySelectorAll('i-dropdown')
         const state = data.expanded
         const type = state ? 'expanded' : 'collapsed'
-        const to = `${from} / listbox / ui-list`
-        const { notify: from_notify, address: from_address, make: from_make } =  names[from]
-        from_notify(from_make({to: from_address, type, data: {from, expanded: state}}) )
-        dropdowns.forEach( item => {
-            const name = item.getAttribute('aria-label')
-            const to = `${name} / listbox / ui-list`
-            item.style.zIndex = '99'
-            if (name !== from) {
-                const { notify: name_notify, address: name_address, make: name_make } =  recipients[name]
-                name_notify(name_make({to: name_address, type: 'collapsed', data: {name, expanded: !state}}) )
-                item.removeAttribute('style')
-            }
-        })
+        const { notify: from_notify, address: from_address, make: from_make } = names[from]
+        from_notify(from_make({to: from_address, type, data: { expanded: state }}) )
+        console.log({NAME: names[from].name, from, expanded: data.expanded, name: data.name })
+        // dropdowns.forEach( item => {
+        //     const name = item.getAttribute('aria-label')
+        //     item.style.zIndex = '99'
+        //     if (name !== names[from].name) {
+        //         const { notify: name_notify, address: name_address, make: name_make } =  recipients[name]
+        //         name_notify(name_make({ to: name_address, type: 'collapsed', data: { expanded: !state } }) )
+        //         item.removeAttribute('style')
+        //     }
+        // })
     }
 }
 
