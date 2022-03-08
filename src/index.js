@@ -35,16 +35,21 @@ function i_dropdown (opts, parent_protocol) {
         // handle
         const { notify, address, make } = recipients['parent']
         notify(make({ to: address, type, data }))
-        if (type.match(/expanded|collapsed/)) return handle_expanded_event( data)
+        console.log({INDEX_RECEIVES_FROM_NAME: names[from].name, expanded: data?.expanded, type })
+        if (type.match(/expanded|collapsed/)) return handle_expand_collapse_event(from, data)
         if (type.match(/selected/)) return handle_select_event(data)
     }
 // -----------------------------------------
     const {name, button = {}, list = {}, expanded = false, disabled = false, mode = 'listbox-single', theme} = opts
     var i_list
     const list_name = `${name}-list`
-    let is_expanded = expanded
-    let is_disabled = disabled
+    const button_name = `${name}-button`
+    const state = {
+        is_expanded: expanded,
+        is_disabled: disabled
+    }
     let store_data = []
+    var shadow
 
     if (mode === 'listbox-single') {
         var init_selected = {...button}
@@ -66,13 +71,13 @@ function i_dropdown (opts, parent_protocol) {
     
     function widget () {
         const dropdown = document.createElement('i-dropdown')
-        const shadow = dropdown.attachShadow({mode: 'closed'})
+        shadow = dropdown.attachShadow({mode: 'closed'})
         const button = i_button({ 
-            name, 
+            name: button_name,
             role: 'listbox', 
             mode: mode.match(/listbox/) ? 'selector' : 'menu', 
-            expanded: is_expanded, 
-            disabled: is_disabled, 
+            expanded: state.is_expanded, 
+            disabled: state.is_disabled, 
             theme: {
                 style: `
                     :host(i-button) > .icon {
@@ -87,40 +92,25 @@ function i_dropdown (opts, parent_protocol) {
                 props: {},
                 grid: {}
             }
-        }, make_protocol(name))
+        }, make_protocol(button_name))
         
-        i_list = make_list({ list_name, opts: list, mode, hidden: is_expanded }, make_protocol(list_name))
+        i_list = make_list({ list_name, opts: list, mode, hidden: state.is_expanded }, make_protocol(list_name))
         
         // notify(message)
         dropdown.setAttribute('aria-label', name)
-        if (is_disabled) dropdown.setAttribute('disabled', is_disabled)
+        if (state.is_disabled) dropdown.setAttribute('disabled', state.is_disabled)
         style_sheet(shadow, style)
-        handle_collapsed()
+        handle_collapse_all()
         shadow.append(button)
         // need to add this to avoid document.body.addEventListener('click)
         dropdown.onclick = event => event.stopPropagation()
 
         return dropdown
-
-        function handle_collapsed () {
-            // trigger expanded event via document.body
-            document.body.addEventListener('click', (e)=> {
-                const type = 'collapsed'
-                if (is_expanded) {
-                    is_expanded = false
-                    const { name: name_notify, make: name_make, address: name_address } = recipients[name]
-                    name_notify(name_make({ to: name_address, type, data: is_expanded }))
-                    const { notify: list_notify, make: list_make, address: list_address } = recipients[list_name]
-                    list_notify(list_make({ to: list_address, type, data: !is_expanded }))
-                    const { notify, make, address } = recipients['parent']
-                    notify(make({to: address, type, data: { selected: store_data }}) )
-                }
-            })
-        }
     }
 
+    // HANDLERS
     function handle_change_event (content) {
-        const { notify: name_notify, make: name_make, address: name_address } = recipients[name]
+        const { notify: name_notify, make: name_make, address: name_address } = recipients[button_name]
         name_notify(name_make({ to: name_address, type: 'changed', data: content }))
         
         const { notify, make, address } = recipients['parent']
@@ -146,21 +136,40 @@ function i_dropdown (opts, parent_protocol) {
         store_data = new_data
     }
 
-    function handle_expanded_event (data) {
-        const {from, expanded} = data
-        is_expanded = expanded
-        const type = is_expanded ? 'expanded' : 'collapsed'
+    function handle_expand_collapse_event (from, data) {
+        state.is_expanded = data.expanded
+        const type = state.is_expanded ? 'expanded' : 'collapsed'
+        console.log('HANDLING EXPANDED EVENT', {type, from, button_name, list_name, expanded: data.expanded } )
         // check which one dropdown is not using then do collapsed
-        const { notify: name_notify, make: name_make, address: name_address } = recipients[name]
+        const { notify: button_notify, make: button_make, address: button_address } = recipients[button_name]
         const { notify: list_notify, make: list_make, address: list_address } = recipients[list_name]
-        if (from !== name) {
-            name_notify(name_make({ to: name_address,type: 'collapsed', data: is_expanded }))
-            list_notify(list_make({ to: list_address, type, data: !is_expanded }))
+        if (!button_name) {
+            button_notify(button_make({ to: button_address,type: 'collapsed', data: state.is_expanded }))
+            list_notify(list_make({ to: list_address, type, data: !state.is_expanded }))
         }
         // check which dropdown is currently using then do expanded
-        name_notify(name_make({ to: name_address, type, data: is_expanded }))
-        list_notify(list_make({ to: list_address, type, data: !is_expanded }))
-        if (is_expanded && from == name) shadow.append(i_list)
+        button_notify(button_make({ to: button_address, type, data: state.is_expanded }))
+        list_notify(list_make({ to: list_address, type, data: !state.is_expanded }))
+        if (state.is_expanded && names[from].name === button_name) shadow.append(i_list)
+    }
+
+    function handle_collapse_all () {
+        // trigger expanded event via document.body
+        document.body.addEventListener('click', (e) => {
+            const type = 'collapsed'
+            if (state.is_expanded) {
+                state.is_expanded = false
+                // notify button
+                const { notify: name_notify, make: name_make, address: name_address } = recipients[button_name]
+                name_notify(name_make({ to: name_address, type, data: state.is_expanded }))
+                // notify list
+                const { notify: list_notify, make: list_make, address: list_address } = recipients[list_name]
+                list_notify(list_make({ to: list_address, type, data: !state.is_expanded }))
+                // notify parent
+                const { notify, make, address } = recipients['parent']
+                notify(make({to: address, type, data: { selected: store_data }}) )
+            }
+        })
     }
 
     
