@@ -36,12 +36,27 @@ function demo () {
         // handle
         const { notify: log_notify, address: log_address, make: log_make } = recipients['logs']
         log_notify(log_make({ to: log_address, type, data }))
-        if (type === 'click') return handle_dropdown_menu_event(from, data)
+        // if (type === 'click') return handle_dropdown_menu_event(from, data)
     }
-// ------------------------------
+    // ------------------------------
     const logs = terminal({mode: 'compact', expanded: false}, make_protocol('logs'))
-    const single_select_opts = 
-    {
+    const dropdown_up_option = {
+        name: 'up-selector',
+        expanded: false,
+        button: {
+            name: 'up-selector'
+        },
+        list: {
+            name: 'up-list',
+            direction: 'up',
+            end: '55px',
+            array: [
+                { text: 'datdot.org', role: 'menuitem' },
+                { text: 'playproject.io', role: 'menuitem' }
+            ]
+        }
+    }
+    const single_select_opts = {
         name: 'terminal',
         mode: 'listbox-single',
         expanded: false,
@@ -89,8 +104,7 @@ function demo () {
         },
     }
 
-    const multiple_select_opt = 
-    {
+    const multiple_select_opt = {
         name: 'filter',
         mode : 'listbox-multi',
         expanded: false,
@@ -108,18 +122,18 @@ function demo () {
             array: [
                 {
                     text: 'Option1',
-                    cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
                     list: {name: 'star'},
                     // selected: false
                 },
                 {
                     text: 'Option2',
-                    list: {name: 'star'},
+                    list: { name: 'star' },
                     selected: true
                 },
                 {
                     text: 'Option3',
-                    list: {name: 'star'},
+                    list: { name: 'star'},
+                    cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
                     selected: true
                 }
             ],
@@ -131,22 +145,6 @@ function demo () {
         }
     }
     
-    const dropdown_up_option = {
-        name: 'up-selector',
-        expanded: false,
-        button: {
-            name: 'up-selector'
-        },
-        list: {
-            name: 'up-list',
-            direction: 'up',
-            end: '55px',
-            array: [
-                { text: 'datdot.org', role: 'menuitem' },
-                { text: 'playproject.io', role: 'menuitem' }
-            ]
-        }
-    }
 
     const d_up = dropdown(dropdown_up_option, make_protocol(dropdown_up_option.name))
     const d_single = dropdown(single_select_opts, make_protocol(single_select_opts.name))
@@ -155,18 +153,9 @@ function demo () {
     
     const content = bel` <div class="${css.content}">
         <h1>Dropdown</h1>
-        <aside class="${css.example}">
-            <h2>menu</h2>
-            ${d_up}
-        </aside>
-        <aside class="${css.example}">
-            <h2>Single select</h2>
-            ${d_single}
-        </aside>
-        <aside class="${css.example}">
-            <h2>Mutiple select</h2>
-            ${d_multi}
-        </aside>
+        <aside class="${css.example}"><h2>Menu</h2>${d_up}</aside>
+        <aside class="${css.example}"><h2>Listbox single select</h2>${d_single}</aside>
+        <aside class="${css.example}"><h2>Listbox multiple select</h2>${d_multi}</aside>
     </div>`
 
     const container = bel`<div class="${css.container}">${content}</div>`
@@ -181,15 +170,15 @@ function demo () {
         const { notify: from_notify, address: from_address, make: from_make } = names[from]
         from_notify(from_make({to: from_address, type, data: { expanded: state }}) )
         console.log({NAME: names[from].name, from, expanded: data.expanded, name: data.name })
-        // dropdowns.forEach( item => {
-        //     const name = item.getAttribute('aria-label')
-        //     item.style.zIndex = '99'
-        //     if (name !== names[from].name) {
-        //         const { notify: name_notify, address: name_address, make: name_make } =  recipients[name]
-        //         name_notify(name_make({ to: name_address, type: 'collapsed', data: { expanded: !state } }) )
-        //         item.removeAttribute('style')
-        //     }
-        // })
+        dropdowns.forEach( item => {
+            const name = item.getAttribute('aria-label')
+            item.style.zIndex = '99'
+            if (name !== names[from].name) {
+                const { notify: name_notify, address: name_address, make: name_make } =  recipients[name]
+                name_notify(name_make({ to: name_address, type: 'collapsed', data: { expanded: !state } }) )
+                item.removeAttribute('style')
+            }
+        })
     }
 }
 

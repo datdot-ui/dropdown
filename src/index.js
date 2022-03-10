@@ -1,7 +1,8 @@
 const style_sheet = require('support-style-sheet')
 const message_maker = require('message-maker')
 const i_button = require('datdot-ui-button')
-const make_list = require('make-list')
+const render_list = require('render-list')
+const i_list = require('datdot-ui-list')
 
 var id = 0
 
@@ -31,43 +32,41 @@ function i_dropdown (opts, parent_protocol) {
         const { head, refs, type, data, meta } = msg // receive msg
         inbox[head.join('/')] = msg                  // store msg
         const [from, to, msg_id] = head
-        console.log('New message', { from, msg })
+        // console.log('New message', { from, msg })
         // handle
         const { notify, address, make } = recipients['parent']
         notify(make({ to: address, type, data }))
-        console.log({INDEX_RECEIVES_FROM_NAME: names[from].name, expanded: data?.expanded, type })
+        console.log({INDEX_RECEIVES_FROM_NAME: names[from].name, type, expanded: data?.expanded })
         if (type.match(/expanded|collapsed/)) return handle_expand_collapse_event(from, data)
         if (type.match(/selected/)) return handle_select_event(data)
     }
 // -----------------------------------------
-    const {name, button = {}, list = {}, expanded = false, disabled = false, mode = 'listbox-single', theme} = opts
-    var i_list
+    const {name, button = {}, list = {}, expanded = true, disabled = false, mode = 'listbox-single', theme} = opts
+    var list_el
     const list_name = `${name}-list`
     const button_name = `${name}-button`
     const state = {
         is_expanded: expanded,
         is_disabled: disabled
     }
-    let store_data = []
+    const { icons = {} } = button
     var shadow
+
+    let selected_items = list.array.filter(item => item.current || item.selected)
+    if (!selected_items.length) selected_items.push(list.array[0])
 
     if (mode === 'listbox-single') {
         var init_selected = {...button}
-        list.array.map(item => {
-            const obj = item.current || item.selected ?  item : list.array[0]
-            init_selected = {
-                name,
-                body: obj.text,
-                icons: {
-                    select: button.select ? button.select : undefined,
-                    icon: obj.icon,
-                },
-                cover: obj.cover,
-            }
-        })
-        store_data.push(init_selected)
+        const [selected_item] = selected_items
+        init_selected = {
+            name,
+            body: selected_item.text,
+            icons,
+            cover: selected_item.cover,
+        }
+        
+        selected_items.push(init_selected)
     }
-    if (mode === 'listbox-multi') { list.array.map( item => { if (item.selected) store_data.push(item) }) }
     
     function widget () {
         const dropdown = document.createElement('i-dropdown')
@@ -94,13 +93,20 @@ function i_dropdown (opts, parent_protocol) {
             }
         }, make_protocol(button_name))
         
-        i_list = make_list({ list_name, opts: list, mode, hidden: state.is_expanded }, make_protocol(list_name))
+        list_el = i_list({
+            list_name, 
+            body: render_list({ list, mode }), 
+            mode, 
+            hidden: state.is_expanded, 
+            expanded: !state.is_expanded, 
+            theme
+        }, make_protocol(list_name))
         
         // notify(message)
         dropdown.setAttribute('aria-label', name)
         if (state.is_disabled) dropdown.setAttribute('disabled', state.is_disabled)
         style_sheet(shadow, style)
-        handle_collapse_all()
+        add_collapse_all_listener()
         shadow.append(button)
         // need to add this to avoid document.body.addEventListener('click)
         dropdown.onclick = event => event.stopPropagation()
@@ -133,7 +139,7 @@ function i_dropdown (opts, parent_protocol) {
         if (mode === 'listbox-multi') {
             new_data = selected.filter( obj => obj.selected )
         }
-        store_data = new_data
+        selected_items = new_data
     }
 
     function handle_expand_collapse_event (from, data) {
@@ -150,10 +156,10 @@ function i_dropdown (opts, parent_protocol) {
         // check which dropdown is currently using then do expanded
         button_notify(button_make({ to: button_address, type, data: state.is_expanded }))
         list_notify(list_make({ to: list_address, type, data: !state.is_expanded }))
-        if (state.is_expanded && names[from].name === button_name) shadow.append(i_list)
+        if (state.is_expanded && names[from].name === button_name) shadow.append(list_el)
     }
 
-    function handle_collapse_all () {
+    function add_collapse_all_listener () {
         // trigger expanded event via document.body
         document.body.addEventListener('click', (e) => {
             const type = 'collapsed'
@@ -167,11 +173,10 @@ function i_dropdown (opts, parent_protocol) {
                 list_notify(list_make({ to: list_address, type, data: !state.is_expanded }))
                 // notify parent
                 const { notify, make, address } = recipients['parent']
-                notify(make({to: address, type, data: { selected: store_data }}) )
+                notify(make({to: address, type, data: { selected: selected_items }}) )
             }
         })
     }
-
     
     // insert CSS style
     const custom_style = theme ? theme.style : ''
