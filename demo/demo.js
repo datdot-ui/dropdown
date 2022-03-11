@@ -26,7 +26,7 @@ function demo () {
         }
     }
     function listen (msg) {
-        console.log('New message', { msg })
+        // console.log('New message', { msg })
         const { head, refs, type, data, meta } = msg // receive msg
         inbox[head.join('/')] = msg                  // store msg
         const [from] = head
