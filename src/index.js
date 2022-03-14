@@ -1,7 +1,6 @@
 const style_sheet = require('support-style-sheet')
 const message_maker = require('message-maker')
 const i_button = require('datdot-ui-button')
-const render_list = require('render-list')
 const i_list = require('datdot-ui-list')
 
 var id = 0
@@ -94,7 +93,18 @@ function i_dropdown (opts, parent_protocol) {
         
         list_el = i_list({
             list_name, 
-            body: render_list({ list, mode }), 
+            body: list.array.map(option => {
+                if (option.current || option.selected) {
+                    // if only current or selected set to true, update the other one to true too
+                    if (mode === 'listbox-multi') option.current = option.selected = true
+                    else if (mode === 'listbox-single') {
+                        // if many set as selected or true, take first only for single select
+                        if (!first) option.current = option.selected = true
+                        first = true
+                    } 
+                }
+                return option
+            }),
             mode, 
             hidden: state.is_expanded, 
             expanded: !state.is_expanded, 

@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/playproject-io/datdot-ui-dropdown#readme",
   "devDependencies": {
+    "browserify": "^17.0.0",
     "budo": "^11.6.4"
   },
   "dependencies": {
