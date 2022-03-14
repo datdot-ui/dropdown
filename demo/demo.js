@@ -123,12 +123,11 @@ function demo () {
                 {
                     text: 'Option1',
                     list: {name: 'star'},
-                    // selected: false
+                    selected: true
                 },
                 {
                     text: 'Option2',
                     list: { name: 'star' },
-                    selected: true
                 },
                 {
                     text: 'Option3',
