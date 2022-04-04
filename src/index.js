@@ -124,7 +124,7 @@ function i_dropdown (opts, parent_protocol) {
     }
 
     // HANDLERS
-    function handle_change_event (content) {
+    function notify_change (content) {
         const { notify: name_notify, make: name_make, address: name_address } = recipients[button_name]
         name_notify(name_make({ to: name_address, type: 'changed', data: content }))
         
@@ -134,21 +134,21 @@ function i_dropdown (opts, parent_protocol) {
 
     function handle_select_event (data) {
         const {mode, selected} = data
-        let new_data = []
+        let filtered = []
         if (mode === 'dropdown') return
         if (mode === 'listbox-single') {
-            selected.map( obj => {
+            selected.forEach(obj => {
                 if (obj.selected) {
+                    filtered.push(obj)
                     const content = {text: obj.text, cover: obj.cover, icon: obj.icon}
-                    new_data.push(obj)
-                    return handle_change_event (content)
+                    return notify_change(content)
                 }
             })
         }
         if (mode === 'listbox-multi') {
-            new_data = selected.filter( obj => obj.selected )
+            filtered = selected.filter( obj => obj.selected )
         }
-        selected_items = new_data
+        selected_items = filtered
     }
 
     function handle_expand_collapse (from, data) {
