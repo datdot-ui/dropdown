@@ -1,6 +1,6 @@
 {
   "name": "datdot-ui-dropdown",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha",
   "description": "",
   "main": "src/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/playproject-io/datdot-ui-dropdown.git"
+    "url": "git+https://github.com/datdot-ui/dropdown.git"
   },
   "keywords": [
     "datdot",
@@ -21,20 +21,20 @@
   "author": "datdotorg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/playproject-io/datdot-ui-dropdown/issues"
+    "url": "https://github.com/datdot-ui/dropdown/issues"
   },
-  "homepage": "https://github.com/playproject-io/datdot-ui-dropdown#readme",
+  "homepage": "https://github.com/datdot-ui/dropdown#readme",
   "devDependencies": {
     "browserify": "^17.0.0",
-    "budo": "^11.6.4"
+    "budo": "^11.6.4",
+    "datdot-terminal": "git+https://github.com/datdot-ui/terminal.git#v0.0.1-alpha"
   },
   "dependencies": {
     "bel": "^6.0.0",
     "csjs-inject": "^1.0.1",
-    "datdot-terminal": "git+https://github.com/datdotorg/datdot-terminal.git",
-    "datdot-ui-button": "git+https://github.com/datdotorg/datdot-ui-button.git",
-    "datdot-ui-icon": "git+https://github.com/datdotorg/datdot-ui-icon.git",
-    "datdot-ui-list": "git+https://github.com/datdotorg/datdot-ui-list.git",
+    "datdot-ui-button": "git+https://github.com/datdot-ui/button.git#v0.0.1-alpha",
+    "datdot-ui-icon": "git+https://github.com/datdot-ui/icon.git#v0.0.1-alpha",
+    "datdot-ui-list": "git+https://github.com/datdot-ui/list.git#v0.0.1-alpha",
     "message-maker": "git+https://github.com/datdotorg/message-maker.git"
   }
 }
