@@ -1,6 +1,6 @@
 {
   "name": "datdot-ui-dropdown",
-  "version": "0.0.0",
+  "version": "0.0.0-alpha",
   "description": "",
   "main": "src/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/playproject-io/datdot-ui-dropdown.git"
+    "url": "git+https://github.com/datdot-ui/dropdown.git"
   },
   "keywords": [
     "datdot",
@@ -21,18 +21,18 @@
   "author": "fionataeyang",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/playproject-io/datdot-ui-dropdown/issues"
+    "url": "https://github.com/datdot-ui/dropdown/issues"
   },
-  "homepage": "https://github.com/playproject-io/datdot-ui-dropdown#readme",
+  "homepage": "https://github.com/datdot-ui/dropdown#readme",
   "devDependencies": {
     "budo": "^11.6.4"
   },
   "dependencies": {
     "bel": "^6.0.0",
     "csjs-inject": "^1.0.1",
-    "datdot-terminal": "git+https://github.com/fionataeyang/datdot-terminal.git",
-    "datdot-ui-button": "git+https://github.com/fionataeyang/datdot-ui-button.git",
-    "datdot-ui-icon": "git+https://github.com/fionataeyang/datdot-ui-icon.git",
-    "datdot-ui-list": "git+https://github.com/fionataeyang/datdot-ui-list.git"
+    "datdot-terminal": "github:datdot-ui/terminal#v0.0.0-alpha",
+    "datdot-ui-button": "github:datdot-ui/button#v0.0.0-alpha",
+    "datdot-ui-icon": "github:datdot-ui/icon#v0.0.0-alpha",
+    "datdot-ui-list": "github:datdot-ui/list#v0.0.0-alpha"
   }
 }
