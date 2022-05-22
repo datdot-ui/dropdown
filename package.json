@@ -35,6 +35,6 @@
     "datdot-ui-button": "github:datdot-ui/button#v0.0.1-alpha",
     "datdot-ui-icon": "github:datdot-ui/icon#v0.0.1-alpha",
     "datdot-ui-list": "github:datdot-ui/list#v0.0.1-alpha",
-    "message-maker": "git+https://github.com/datdotorg/message-maker.git"
+    "protocol-maker": "github:datdotorg/protocol-maker#v0.0.1-alpha"
   }
 }

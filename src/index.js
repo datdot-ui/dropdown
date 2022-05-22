@@ -1,5 +1,5 @@
 const style_sheet = require('support-style-sheet')
-const message_maker = require('message-maker')
+const protocol_maker = require('protocol-maker')
 const i_button = require('datdot-ui-button')
 const i_list = require('datdot-ui-list')
 
@@ -7,34 +7,18 @@ var id = 0
 
 module.exports = i_dropdown
 
-function i_dropdown (opts, parent_protocol) {    
+function i_dropdown (opts, parent_wire) {    
 // -----------------------------------------
-    const myaddress = `${__filename}-${id++}`
-    const inbox = {}
-    const outbox = {}
-    const recipients = {}
-    const names = {}
-    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
-
-    const {notify, address} = parent_protocol(myaddress, listen)
-    names[address] = recipients['parent'] = { name: 'parent', notify, address, make: message_maker(myaddress) }
-    notify(recipients['parent'].make({ to: address, type: 'ready', refs: {} }))
-
-    function make_protocol (name) {
-        return function protocol (address, notify) {
-            names[address] = recipients[name] = { name, address, notify, make: message_maker(myaddress) }
-            return { notify: listen, address: myaddress }
-        }
-    }
+    const initial_contacts = { 'parent': parent_wire }
+    const contacts = protocol_maker('input-number', listen, initial_contacts)
     
     function listen (msg) {
         const { head, refs, type, data, meta } = msg // receive msg
-        inbox[head.join('/')] = msg                  // store msg
         const [from, to, msg_id] = head
-        console.log('DROPDOWN', { from, name: names[from].name, data })
+        console.log('DROPDOWN', { from, name: contacts.by_address[from].name, data })
         // handle
-        const { notify, address, make } = recipients['parent']
-        notify(make({ to: address, type, data }))
+        const $parent = contacts.by_name['parent']
+        $parent.notify($parent.make({ to: $parent.address, type, data }))
         if (type.match(/expanded|collapsed/)) return handle_expand_collapse(from, data)
         if (type.match(/selected/)) return handle_select_event(data)
     }
@@ -89,7 +73,7 @@ function i_dropdown (opts, parent_protocol) {
                 props: {},
                 grid: {}
             }
-        }, make_protocol(button_name))
+        }, contacts.add(button_name))
         
         list_el = i_list({
             list_name, 
@@ -109,7 +93,7 @@ function i_dropdown (opts, parent_protocol) {
             hidden: state.is_expanded, 
             expanded: !state.is_expanded, 
             theme
-        }, make_protocol(list_name))
+        }, contacts.add(list_name))
         
         // notify(message)
         dropdown.setAttribute('aria-label', name)
@@ -125,11 +109,11 @@ function i_dropdown (opts, parent_protocol) {
 
     // HANDLERS
     function notify_change (content) {
-        const { notify: name_notify, make: name_make, address: name_address } = recipients[button_name]
-        name_notify(name_make({ to: name_address, type: 'changed', data: content }))
+        const $button = contacts.by_name[button_name]
+        $button.notify($button.make({ to: $button.address, type: 'changed', data: content }))
         
-        const { notify, make, address } = recipients['parent']
-        notify(make({ to: address, type: 'changed', data: content }))
+        const $parent = contacts.by_name['parent']
+        $parent.notify($parent.make({ to: $parent.address, type: 'changed', data: content }))
     }
 
     function handle_select_event (data) {
@@ -155,16 +139,16 @@ function i_dropdown (opts, parent_protocol) {
         state.is_expanded = data.expanded
         const type = state.is_expanded ? 'expanded' : 'collapsed'
         // check which one dropdown is not using then do collapsed
-        const { notify: button_notify, make: button_make, address: button_address } = recipients[button_name]
-        const { notify: list_notify, make: list_make, address: list_address } = recipients[list_name]
-        if (names[from].name !== button_name) {
-            button_notify(button_make({ to: button_address,type: 'collapsed', data: state.is_expanded }))
-            list_notify(list_make({ to: list_address, type, data: !state.is_expanded }))
+        const $button = contacts.by_name[button_name]
+        const $list = contacts.by_name[list_name]
+        if (contacts.by_address[from].name !== button_name) {
+            $button.notify($button.make({ to: $button.address,type: 'collapsed', data: state.is_expanded }))
+            $list.notify($list.make({ to: $list.address, type, data: !state.is_expanded }))
         }
         // check which dropdown is currently using then do expanded
-        button_notify(button_make({ to: button_address, type, data: state.is_expanded }))
-        list_notify(list_make({ to: list_address, type, data: state.is_expanded }))
-        if (state.is_expanded && names[from].name === button_name) shadow.append(list_el)
+        $button.notify($button.make({ to: $button.address, type, data: state.is_expanded }))
+        $list.notify($list.make({ to: $list.address, type, data: state.is_expanded }))
+        if (state.is_expanded && contacts.by_address[from].name === button_name) shadow.append(list_el)
     }
 
     function add_collapse_all () {
@@ -175,14 +159,14 @@ function i_dropdown (opts, parent_protocol) {
                 state.is_expanded = false
 
                 // notify button
-                const { notify: name_notify, make: name_make, address: name_address } = recipients[button_name]
-                name_notify(name_make({ to: name_address, type, data: state.is_expanded }))
+                const $button = contacts.by_name[button_name]
+                $button.notify($button.make({ to: $button.address, type, data: state.is_expanded }))
                 // notify list
-                const { notify: list_notify, make: list_make, address: list_address } = recipients[list_name]
-                list_notify(list_make({ to: list_address, type, data: state.is_expanded }))
+                const $list = contacts.by_name[list_name]
+                $list.notify($list.make({ to: $list.address, type, data: state.is_expanded }))
                 // notify parent
-                const { notify, make, address } = recipients['parent']
-                notify(make({to: address, type, data: { selected: selected_items }}) )
+                const $parent = contacts.by_name['parent']
+                $parent.notify($parent.make({to: $parent.address, type, data: { selected: selected_items }}) )
             }
         })
     }

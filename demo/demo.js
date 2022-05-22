@@ -5,41 +5,25 @@ const csjs = require('csjs-inject')
 const terminal = require('datdot-terminal')
 const icon = require('datdot-ui-icon')
 const dropdown = require('..')
-const message_maker = require('message-maker')
+const protocol_maker = require('protocol-maker')
 const make_grid = require('../src/node_modules/make-grid')
 
 var id = 0
 
 function demo () {
 // ------------------------------
-    const myaddress = `${__filename}-${id++}`
-    const inbox = {}
-    const outbox = {}
-    const recipients = {}
-    const names = {}
-    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
-
-    function make_protocol (name) {
-        return function protocol (address, notify) {
-            names[address] = recipients[name] = { name, address, notify, make: message_maker(myaddress) }
-            return { notify: listen, address: myaddress }
-        }
-    }
+    const contacts = protocol_maker('demo', listen) 
     function listen (msg) {
         // console.log('New message', { msg })
         const { head, refs, type, data, meta } = msg // receive msg
-        inbox[head.join('/')] = msg                  // store msg
         const [from] = head
         // send back ack
-        // const { notify: from_notify, address: from_address, make: from_make } = names[from]
+        // const { notify: from_notify, address: from_address, make: from_make } = contacts.by_address[from]
         // from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
         // handle
-        const { notify: log_notify, address: log_address, make: log_make } = recipients['logs']
-        log_notify(log_make({ to: log_address, type, data }))
         // if (type === 'click') return handle_dropdown_menu_event(from, data)
     }
     // ------------------------------
-    const logs = terminal({mode: 'compact', expanded: false}, make_protocol('logs'))
     const dropdown_up_option = {
         name: 'up-selector',
         expanded: false,
@@ -145,9 +129,9 @@ function demo () {
     }
     
 
-    const d_up = dropdown(dropdown_up_option, make_protocol(dropdown_up_option.name))
-    const d_single = dropdown(single_select_opts, make_protocol(single_select_opts.name))
-    const d_multi = dropdown(multiple_select_opt, make_protocol(multiple_select_opt.name))
+    const d_up = dropdown(dropdown_up_option, contacts.add(dropdown_up_option.name))
+    const d_single = dropdown(single_select_opts, contacts.add(single_select_opts.name))
+    const d_multi = dropdown(multiple_select_opt, contacts.add(multiple_select_opt.name))
 
     
     const content = bel` <div class="${css.content}">
@@ -158,7 +142,7 @@ function demo () {
     </div>`
 
     const container = bel`<div class="${css.container}">${content}</div>`
-    const app = bel`<div class="${css.wrap}">${container}${logs}</div>`
+    const app = bel`<div class="${css.wrap}">${container}</div>`
 
     return app
 
@@ -166,15 +150,15 @@ function demo () {
         const dropdowns = document.querySelectorAll('i-dropdown')
         const state = data.expanded
         const type = state ? 'expanded' : 'collapsed'
-        const { notify: from_notify, address: from_address, make: from_make } = names[from]
-        from_notify(from_make({to: from_address, type, data: { expanded: state }}) )
-        console.log({NAME: names[from].name, from, expanded: data.expanded, name: data.name })
+        const $from = contacts.by_address[from]
+        $from.notify($from.make({to: $from.address, type, data: { expanded: state }}) )
+        console.log({NAME: contacts.by_address[from].name, from, expanded: data.expanded, name: data.name })
         dropdowns.forEach( item => {
             const name = item.getAttribute('aria-label')
             item.style.zIndex = '99'
-            if (name !== names[from].name) {
-                const { notify: name_notify, address: name_address, make: name_make } =  recipients[name]
-                name_notify(name_make({ to: name_address, type: 'collapsed', data: { expanded: !state } }) )
+            if (name !== contacts.by_address[from].name) {
+                const $name = contacts.by_name[name]
+                $name.notify($name.make({ to: $name.address, type: 'collapsed', data: { expanded: !state } }) )
                 item.removeAttribute('style')
             }
         })
