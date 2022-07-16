@@ -1,9 +1,5 @@
-const head = require('head')()
 const bel = require('bel')
 const csjs = require('csjs-inject')
-// datdot-ui dependences
-const terminal = require('datdot-terminal')
-const icon = require('datdot-ui-icon')
 const dropdown = require('..')
 const protocol_maker = require('protocol-maker')
 const make_grid = require('../src/node_modules/make-grid')
@@ -12,157 +8,143 @@ var id = 0
 
 function demo () {
 // ------------------------------
-    const contacts = protocol_maker('demo', listen) 
-    function listen (msg) {
-        // console.log('New message', { msg })
-        const { head, refs, type, data, meta } = msg // receive msg
-        const [from] = head
-        // send back ack
-        // const { notify: from_notify, address: from_address, make: from_make } = contacts.by_address[from]
-        // from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
-        // handle
-        // if (type === 'click') return handle_dropdown_menu_event(from, data)
-    }
-    // ------------------------------
-    const dropdown_up_option = {
-        name: 'up-selector',
-        expanded: false,
-        button: {
-            name: 'up-selector'
-        },
-        list: {
-            name: 'up-list',
-            direction: 'up',
-            end: '55px',
-            array: [
-                { text: 'datdot.org', role: 'menuitem' },
-                { text: 'playproject.io', role: 'menuitem' }
-            ]
-        }
-    }
-    const single_select_opts = {
-        name: 'terminal',
-        mode: 'listbox-single',
-        expanded: false,
-        disabled: false,
-        button: {
-            // select: {name: 'star'}
-            theme: {
-                props: {
-                    listbox_collapsed_bg_color: 'var(--color-greyA2)',
-                    listbox_collapsed_bg_color_hover: 'var(--color-white)',
-                    listbox_collapsed_listbox_size: 'var(--size30)',
-                    listbox_collapsed_listbox_color: 'var(--color-white)',
-                    listbox_collapsed_listbox_color_hover: 'var(--color-blue)',
-                    listbox_collapsed_listbox_icon_fill: 'var(--color-white)',
-                    listbox_collapsed_icon_fill_hover: 'var(--color-green)',
-                    listbox_expanded_listbox_color: 'var(--color-orange)',
-                    listbox_expanded_listbox_icon_fill: 'var(--color-black)',
-                    listbox_expanded_icon_fill: 'var(--color-blue)',
-                    listbox_expanded_bg_color: 'var(--color-white)'
-                },
-                grid: {
-                    auto: {
-                        auto_flow: 'row'
-                    }
-                }
-            }
-        },
-        list: {
-            array: [
-                {
-                    text: 'Compact messages',
-                    icon: {name: 'plus'},
-                    cover: 'https://cdn.pixabay.com/photo/2021/08/07/08/49/building-6528075_960_720.jpg',
-                    // current: true,
-                    // selected: false,
-                },
-                {
-                    text: 'Comfortable messages',
-                    icon: {name: 'edit'},
-                    cover: 'https://cdn.pixabay.com/photo/2021/08/23/12/41/foxtail-6567731_960_720.jpg'
-                    // current: true,
-                    // selected: true
-                }
-            ] 
-        },
-    }
+	const contacts = protocol_maker('demo', listen) 
+	function listen (msg) {
+		// console.log('New message', { msg })
+		const { head, refs, type, data, meta } = msg // receive msg
+		const [from] = head
+		// send back ack
+		// const { notify: from_notify, address: from_address, make: from_make } = contacts.by_address[from]
+		// from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
+		// handle
+		// if (type === 'click') return handle_dropdown_menu_event(from, data)
+	}
+	// ------------------------------
 
-    const multiple_select_opt = {
-        name: 'filter',
-        mode : 'listbox-multi',
-        expanded: false,
-        disabled: false,
-        button: {
-            body: 'Filter',
-            // mode: 'selector',
-            icons: {
-                select: {name: 'filter'},
-                icon: {name: 'edit'}
-            },
-            cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        },
-        list: {
-            array: [
-                {
-                    text: 'Option1',
-                    list: {name: 'star'},
-                    selected: true
-                },
-                {
-                    text: 'Option2',
-                    list: { name: 'star' },
-                },
-                {
-                    text: 'Option3',
-                    list: { name: 'star'},
-                    cover: 'https://images.unsplash.com/photo-1629122307243-c913571a1df6?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5MXx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                    selected: true
-                }
-            ],
-        },
-        theme: {
-            props: {
-                margin_top: '23px'
-            }
-        }
-    }
-    
+	const opts_1 = {
+		name: 'dropdown_1',
+		button_opts: {
+			text: 'Filter',
+			// mode: 'selector',
+			icons: [
+				{name: 'filter'},
+			],
+		},
+		list_opts: {
+			body: [
+				{
+					text: 'Option1',
+					icons: [{ name: 'star' }],
+					status: { selected: true }
+				},
+				{
+					text: 'Option2',
+					icons: [{ name: 'star' }],
+				},
+				{
+					text: 'Option3',
+					icons: [{ name: 'star'}],
+					status: { selected: true }
+				}
+			],
+		},
+		theme: `
+			i-list {
+				bottom: 55px;
+				top: unset;
+			}
+			@keyframes down {
+				0% {
+					opacity: 0;
+					bottom: 0;
+				}
+				50% {
+					opacity: 0.5;
+					bottom: 20px;
+				}
+				100%: {
+					opacity: 1;
+					bottom: 40px;
+				}
+			}
+			@keyframes up {
+					0% {
+						opacity: 1;
+						bottom: 40px;
+					}
+					50% {
+						bottom: 20px;
+					}
+					75% {
+						opacity: 0.5;
+					}
+					100%: {
+						opacity: 0;
+						bottom: 0;
+					}
+			} 
+		`
+	}
 
-    const d_up = dropdown(dropdown_up_option, contacts.add(dropdown_up_option.name))
-    const d_single = dropdown(single_select_opts, contacts.add(single_select_opts.name))
-    const d_multi = dropdown(multiple_select_opt, contacts.add(multiple_select_opt.name))
+	const opts_2 = {
+		name: 'dropdown_2',
+		// status: { expanded: true },
+		button_opts: {
+			text: 'Filter',
+			// mode: 'selector',
+			icons: [
+				{name: 'filter'},
+			],
+		},
+		list_opts: {
+			body: [
+				{
+					text: 'Option1',
+					icons: [{ name: 'star' }],
+					status: { selected: true }
+				},
+				{
+					text: 'Option2',
+					icons: [{ name: 'star' }],
+				},
+				{
+					text: 'Option3',
+					icons: [{ name: 'star'}],
+					status: { selected: true }
+				}
+			],
+		}
+	}
+	
+	const dropdown_1 = dropdown(opts_1, contacts.add(opts_1.name))
+	const dropdown_2 = dropdown(opts_2, contacts.add(opts_2.name))
+	
+	const container = bel` 
+	<div class="${css.content}">
+		<h1>Dropdown</h1>
+		<aside class="${css.example}"><h2>Example Up</h2>${dropdown_1}</aside>
+		<aside class="${css.example}"><h2>Example Down</h2>${dropdown_2}</aside>
+	</div>`
 
-    
-    const content = bel` <div class="${css.content}">
-        <h1>Dropdown</h1>
-        <aside class="${css.example}"><h2>Menu</h2>${d_up}</aside>
-        <aside class="${css.example}"><h2>Listbox single select</h2>${d_single}</aside>
-        <aside class="${css.example}"><h2>Listbox multiple select</h2>${d_multi}</aside>
-    </div>`
+	return container
 
-    const container = bel`<div class="${css.container}">${content}</div>`
-    const app = bel`<div class="${css.wrap}">${container}</div>`
-
-    return app
-
-    function handle_dropdown_menu_event (from, data) {
-        const dropdowns = document.querySelectorAll('i-dropdown')
-        const state = data.expanded
-        const type = state ? 'expanded' : 'collapsed'
-        const $from = contacts.by_address[from]
-        $from.notify($from.make({to: $from.address, type, data: { expanded: state }}) )
-        console.log({NAME: contacts.by_address[from].name, from, expanded: data.expanded, name: data.name })
-        dropdowns.forEach( item => {
-            const name = item.getAttribute('aria-label')
-            item.style.zIndex = '99'
-            if (name !== contacts.by_address[from].name) {
-                const $name = contacts.by_name[name]
-                $name.notify($name.make({ to: $name.address, type: 'collapsed', data: { expanded: !state } }) )
-                item.removeAttribute('style')
-            }
-        })
-    }
+	function handle_dropdown_menu_event (from, data) {
+		const dropdowns = document.querySelectorAll('i-dropdown')
+		const state = data.expanded
+		const type = state ? 'expanded' : 'collapsed'
+		const $from = contacts.by_address[from]
+		$from.notify($from.make({to: $from.address, type, data: { expanded: state }}) )
+		console.log({NAME: contacts.by_address[from].name, from, expanded: data.expanded, name: data.name })
+		dropdowns.forEach( item => {
+			const name = item.getAttribute('aria-label')
+			item.style.zIndex = '99'
+			if (name !== contacts.by_address[from].name) {
+				const $name = contacts.by_name[name]
+				$name.notify($name.make({ to: $name.address, type: 'collapsed', data: { expanded: !state } }) )
+				item.removeAttribute('style')
+			}
+		})
+	}
 }
 
 const css = csjs`
@@ -403,11 +385,6 @@ body {
     height: 100%;
     overflow: hidden;
 }
-.wrap {
-    display: grid;
-    ${make_grid({rows: 'minmax(0, 1fr) 200px', areas: ["container", "terminal"]})}
-    height: 100%;
-}
 .container {
     grid-area: container;
     overflow: hidden scroll;
@@ -430,9 +407,6 @@ body {
     background-color: var(--color-white);
     height: 100%;
     overflow: hidden scroll;
-}
-.example:last-child {
-    margin-top: 100px;
 }
 `
 

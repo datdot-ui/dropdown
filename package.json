@@ -1,6 +1,6 @@
 {
   "name": "datdot-ui-dropdown",
-  "version": "0.0.1-alpha",
+  "version": "0.0.4-alpha",
   "description": "",
   "main": "src/index.js",
   "scripts": {
@@ -26,15 +26,14 @@
   "homepage": "https://github.com/datdot-ui/dropdown#readme",
   "devDependencies": {
     "budo": "^11.6.4",
-    "browserify": "^17.0.0",
-    "datdot-terminal": "github:datdot-ui/terminal#v0.0.1-alpha"
+    "browserify": "^17.0.0"
   },
   "dependencies": {
     "bel": "^6.0.0",
     "csjs-inject": "^1.0.1",
-    "datdot-ui-button": "github:datdot-ui/button#v0.0.1-alpha",
-    "datdot-ui-icon": "github:datdot-ui/icon#v0.0.1-alpha",
-    "datdot-ui-list": "github:datdot-ui/list#v0.0.1-alpha",
+    "datdot-ui-button": "github:datdot-ui/button#v0.0.4-alpha",
+    "datdot-ui-icon": "github:datdot-ui/icon#v0.0.4-alpha",
+    "datdot-ui-list": "github:datdot-ui/list#v0.0.4-alpha",
     "protocol-maker": "github:datdotorg/protocol-maker#v0.0.1-alpha"
   }
 }

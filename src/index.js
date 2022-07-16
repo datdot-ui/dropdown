@@ -4,254 +4,167 @@ const i_button = require('datdot-ui-button')
 const i_list = require('datdot-ui-list')
 
 var id = 0
+var count = 0
+const sheet = new CSSStyleSheet()
+const default_opts = {
+	name: 'dropdown',
+	button_opts: { name: 'button'},
+	list_opts: { name: 'list' },
+	status: { disabled: false, expanded: false },
+	theme: get_theme()
+}
+sheet.replaceSync(default_opts.theme)
 
-module.exports = i_dropdown
+module.exports = dropdown
 
-function i_dropdown (opts, parent_wire) {    
+dropdown.help = () => { return { opts: default_opts } }
+
+function dropdown (opts, parent_wire) {    
 // -----------------------------------------
-    const initial_contacts = { 'parent': parent_wire }
-    const contacts = protocol_maker('input-number', listen, initial_contacts)
-    
-    function listen (msg) {
-        const { head, refs, type, data, meta } = msg // receive msg
-        const [from, to, msg_id] = head
-        console.log('DROPDOWN', { from, name: contacts.by_address[from].name, data })
-        // handle
-        const $parent = contacts.by_name['parent']
-        $parent.notify($parent.make({ to: $parent.address, type, data }))
-        if (type.match(/expanded|collapsed/)) return handle_expand_collapse(from, data)
-        if (type.match(/selected/)) return handle_select_event(data)
-    }
+	const initial_contacts = { 'parent': parent_wire }
+	const contacts = protocol_maker('input-number', listen, initial_contacts)
+	
+	function listen (msg) {
+		const { head, refs, type, data, meta } = msg // receive msg
+		const [from, to, msg_id] = head
+		console.log('DROPDOWN', { from, type, name: contacts.by_address[from].name, data })
+		// handle
+		const $from = contacts.by_address[from]
+		$parent.notify($parent.make({ to: $parent.address, type, data }))
+		if (type == 'click' && $from.name === button_name) return handle_expand_collapse()
+	}
+	const $parent = contacts.by_name['parent']
 // -----------------------------------------
-    const {name, button = {}, list = {}, expanded = true, disabled = false, mode = 'listbox-single', theme} = opts
-    var list_el
-    const list_name = `${name}-list`
-    const button_name = `${name}-button`
-    const state = {
-        is_expanded: expanded,
-        is_disabled: disabled
+	const {
+		name = default_opts.name, 
+		button_opts = default_opts.button_opts, 
+		list_opts = default_opts.list_opts,
+		status: {
+			disabled = default_opts.status.disabled,
+			expanded = default_opts.status.expanded,
+		} = {},
+		theme = ``
+	} = opts
+
+	const current_state =  { opts: { name, button_opts, list_opts, status: { disabled, expanded }, sheets: [default_opts.theme, theme] } }
+
+	const list_name = `${name}-list`
+	const button_name = `${name}-button`
+
+	const dropdown = document.createElement('i-dropdown')
+	const shadow = dropdown.attachShadow({mode: 'closed'})
+
+	dropdown.setAttribute('aria-label', name)
+	if (current_state.opts.status.is_disabled) dropdown.setAttribute('disabled', current_state.opts.status.is_disabled)
+
+	const button = i_button(button_opts, contacts.add(button_name))
+	const list = i_list(list_opts, contacts.add(list_name))
+
+	shadow.append(list)
+	shadow.append(button)
+
+	list.setAttribute('aria-hidden', !current_state.opts.status.expanded)
+	if (!current_state.opts.status.expanded)  list.style.visibility = 'hidden'
+
+	// need to add this to avoid document.body.addEventListener('click)
+	document.body.addEventListener('click', (e) => onbodyclick(e))
+	dropdown.onclick = event => event.stopPropagation()
+
+	const custom_theme = new CSSStyleSheet()
+	custom_theme.replaceSync(theme)
+	shadow.adoptedStyleSheets = [sheet, custom_theme]
+
+	return dropdown
+
+	// HANDLERS
+	async function handle_expand_collapse () {
+		current_state.opts.status.expanded = !current_state.opts.status.expanded
+		list.setAttribute('aria-hidden', !current_state.opts.status.expanded)
+		if (current_state.opts.status.expanded) {
+			list.style.visibility = 'visible'
+		} else {
+			await new Promise(ok => setTimeout(ok, 300))
+			list.style.visibility = 'hidden'
+		}
+		$parent.notify($parent.make({ to: $parent.address, type: 'click', data: current_state.opts.status.expanded }))
+	}
+
+	function onbodyclick (e) {
+			const type = 'collapsed'
+			if (current_state.opts.status.expanded) {
+				handle_expand_collapse()
+				// notify button
+				const $button = contacts.by_name[button_name]
+				$button.notify($button.make({ to: $button.address, type, data: current_state.opts.status.expanded }))
+				// notify list
+				const $list = contacts.by_name[list_name]
+				$list.notify($list.make({ to: $list.address, type, data: current_state.opts.status.expanded }))
+				// notify parent
+				const $parent = contacts.by_name['parent']
+				$parent.notify($parent.make({to: $parent.address, type }) )
+			}
+	}
+}
+
+function get_theme () {
+    return `
+    :host(i-dropdown) {
+        position: relative;
+        display: grid;
+        max-width: 100%;
     }
-    const { icons = {} } = button
-    var shadow
-
-    let selected_items = list.array.filter(item => item.current || item.selected)
-    if (!selected_items.length) selected_items.push(list.array[0])
-
-    if (mode === 'listbox-single') {
-        var init_selected = {...button}
-        const [selected_item] = selected_items
-        init_selected = {
-            name,
-            body: selected_item.text,
-            icons,
-            cover: selected_item.cover,
+    :host(i-dropdown[disabled]) {
+        cursor: not-allowed;
+    }
+    i-button {
+        position: relative;
+        z-index: 2;
+    }
+    i-list {
+        position: absolute;
+        left: 0;
+        margin-top: 20px;
+        z-index: 1;
+        width: 100%;
+				top: 23px;
+    }
+    i-list[aria-hidden="false"] {
+        animation: down 0.3s ease-in;
+    }
+    i-list[aria-hidden="true"] {
+        animation: up 0.3s ease-out;
+    } 
+    @keyframes down {
+        0% {
+					opacity: 0;
+					top: 0;
         }
-        
-        selected_items.push(init_selected)
-    }
-    
-    function widget () {
-        const dropdown = document.createElement('i-dropdown')
-        shadow = dropdown.attachShadow({mode: 'closed'})
-        const button = i_button({ 
-            name: button_name,
-            role: 'listbox', 
-            mode: mode.match(/listbox/) ? 'selector' : 'menu', 
-            expanded: state.is_expanded, 
-            disabled: state.is_disabled, 
-            theme: {
-                style: `
-                    :host(i-button) > .icon {
-                        transform: rotate(0deg);
-                        transition: transform 0.4s ease-in-out;
-                    }
-                    :host(i-button[aria-expanded="true"]) > .icon {
-                        transform: rotate(${mode === 'listbox-single' ? '-180' : '0' }deg);
-                    }
-                    ${style}
-                `,
-                props: {},
-                grid: {}
-            }
-        }, contacts.add(button_name))
-        
-        list_el = i_list({
-            list_name, 
-            body: list.array.map(option => {
-                if (option.current || option.selected) {
-                    // if only current or selected set to true, update the other one to true too
-                    if (mode === 'listbox-multi') option.current = option.selected = true
-                    else if (mode === 'listbox-single') {
-                        // if many set as selected or true, take first only for single select
-                        if (!first) option.current = option.selected = true
-                        first = true
-                    } 
-                }
-                return option
-            }),
-            mode, 
-            hidden: state.is_expanded, 
-            expanded: !state.is_expanded, 
-            theme
-        }, contacts.add(list_name))
-        
-        // notify(message)
-        dropdown.setAttribute('aria-label', name)
-        if (state.is_disabled) dropdown.setAttribute('disabled', state.is_disabled)
-        style_sheet(shadow, style)
-        add_collapse_all()
-        shadow.append(button)
-        // need to add this to avoid document.body.addEventListener('click)
-        dropdown.onclick = event => event.stopPropagation()
-
-        return dropdown
-    }
-
-    // HANDLERS
-    function notify_change (content) {
-        const $button = contacts.by_name[button_name]
-        $button.notify($button.make({ to: $button.address, type: 'changed', data: content }))
-        
-        const $parent = contacts.by_name['parent']
-        $parent.notify($parent.make({ to: $parent.address, type: 'changed', data: content }))
-    }
-
-    function handle_select_event (data) {
-        const {mode, selected} = data
-        let filtered = []
-        if (mode === 'dropdown') return
-        if (mode === 'listbox-single') {
-            selected.forEach(obj => {
-                if (obj.selected) {
-                    filtered.push(obj)
-                    const content = {text: obj.text, cover: obj.cover, icon: obj.icon}
-                    return notify_change(content)
-                }
-            })
+        50% {
+					opacity: 0.5;
+					top: 20px;
         }
-        if (mode === 'listbox-multi') {
-            filtered = selected.filter( obj => obj.selected )
+        100%: {
+					opacity: 1;
+					top: 40px;
         }
-        selected_items = filtered
-    }
-
-    function handle_expand_collapse (from, data) {
-        state.is_expanded = data.expanded
-        const type = state.is_expanded ? 'expanded' : 'collapsed'
-        // check which one dropdown is not using then do collapsed
-        const $button = contacts.by_name[button_name]
-        const $list = contacts.by_name[list_name]
-        if (contacts.by_address[from].name !== button_name) {
-            $button.notify($button.make({ to: $button.address,type: 'collapsed', data: state.is_expanded }))
-            $list.notify($list.make({ to: $list.address, type, data: !state.is_expanded }))
-        }
-        // check which dropdown is currently using then do expanded
-        $button.notify($button.make({ to: $button.address, type, data: state.is_expanded }))
-        $list.notify($list.make({ to: $list.address, type, data: state.is_expanded }))
-        if (state.is_expanded && contacts.by_address[from].name === button_name) shadow.append(list_el)
-    }
-
-    function add_collapse_all () {
-        // trigger expanded event via document.body
-        document.body.addEventListener('click', (e) => {
-            const type = 'collapsed'
-            if (state.is_expanded) {
-                state.is_expanded = false
-
-                // notify button
-                const $button = contacts.by_name[button_name]
-                $button.notify($button.make({ to: $button.address, type, data: state.is_expanded }))
-                // notify list
-                const $list = contacts.by_name[list_name]
-                $list.notify($list.make({ to: $list.address, type, data: state.is_expanded }))
-                // notify parent
-                const $parent = contacts.by_name['parent']
-                $parent.notify($parent.make({to: $parent.address, type, data: { selected: selected_items }}) )
-            }
-        })
     }
     
-    // insert CSS style
-    const custom_style = theme ? theme.style : ''
-    // set CSS variables
-    if (theme && theme.props) {
-        var {size, size_hover, current_size, disabled_size,
-            weight, weight_hover, current_weight, current_hover_weight,
-            color, color_hover, current_color, current_bg_color, disabled_color, disabled_bg_color,
-            current_hover_color, current_hover_bg_color,
-            bg_color, bg_color_hover, border_color_hover,
-            border_width, border_style, border_opacity, border_color, border_radius, 
-            padding, margin, width, height, opacity,
-            shadow_color, offset_x, offset_y, blur, shadow_opacity,
-            shadow_color_hover, offset_x_hover, offset_y_hover, blur_hover, shadow_opacity_hover,
-            margin_top = '5px'
-        } = theme.props
-    }
-
-    const {direction = 'down', start = '0', end = '40px'} = list
-
-    const style = `
-        :host(i-dropdown) {
-            position: relative;
-            display: grid;
-            max-width: 100%;
+    @keyframes up {
+        0% {
+					opacity: 1;
+					top: 40px;
         }
-        :host(i-dropdown[disabled]) {
-            cursor: not-allowed;
+        50% {
+					top: 20px;
         }
-        i-button {
-            position: relative;
-            z-index: 2;
+        75% {
+					opacity: 0.5;
         }
-        i-list {
-            position: absolute;
-            left: 0;
-            margin-top: ${margin_top};
-            z-index: 1;
-            width: 100%;
-            ${direction === 'down' ? `top: ${end}` : `bottom: ${end};`}
+        100%: {
+					opacity: 0;
+					top: 0;
         }
-        i-list[aria-hidden="false"] {
-            animation: down 0.3s ease-in;
-        }
-        i-list[aria-hidden="true"] {
-            animation: up 0.3s ease-out;
-        } 
-        
-        @keyframes down {
-            0% {
-                opacity: 0;
-                ${direction === 'down' ? `top: ${start};` : `bottom: ${start};`}
-            }
-            50% {
-                opacity: 0.5;
-                ${direction === 'down' ? `top: 20px;` : `bottom: 20px;`}
-            }
-            100%: {
-                opacity: 1;
-                ${direction === 'down' ? `top: ${end}` : `bottom: ${end};`}
-            }
-        }
-        
-        @keyframes up {
-            0% {
-                opacity: 1;
-                ${direction === 'down' ? `top: ${end}` : `bottom: ${end};`}
-            }
-            50% {
-                ${direction === 'down' ? `top: 20px;` : `bottom: 20px;`}
-            }
-            75% {
-                opacity: 0.5;
-            }
-            100%: {
-                opacity: 0;
-                ${direction === 'down' ? `top: ${start};` : `bottom: ${start};`}
-            }
-        } 
-        ${custom_style}
-    `
-
-    return widget()
+    } 
+`
 }
 
