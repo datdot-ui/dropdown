@@ -2215,10 +2215,6 @@ function dropdown (opts, parent_wire) {
 	list.setAttribute('aria-hidden', !current_state.opts.status.expanded)
 	if (!current_state.opts.status.expanded)  list.style.visibility = 'hidden'
 
-	// need to add this to avoid document.body.addEventListener('click)
-	document.body.addEventListener('click', (e) => onbodyclick(e))
-	dropdown.onclick = event => event.stopPropagation()
-
 	const custom_theme = new CSSStyleSheet()
 	custom_theme.replaceSync(theme)
 	shadow.adoptedStyleSheets = [sheet, custom_theme]
@@ -2231,7 +2227,9 @@ function dropdown (opts, parent_wire) {
 		list.setAttribute('aria-hidden', !current_state.opts.status.expanded)
 		if (current_state.opts.status.expanded) {
 			list.style.visibility = 'visible'
+			document.body.addEventListener('click', onbodyclick)
 		} else {
+			document.body.removeEventListener('click', onbodyclick)
 			await new Promise(ok => setTimeout(ok, 300))
 			list.style.visibility = 'hidden'
 		}
@@ -2239,6 +2237,12 @@ function dropdown (opts, parent_wire) {
 	}
 
 	function onbodyclick (e) {
+			const outside = typeof e.composedPath === 'function' ?
+				!e.composedPath().includes(dropdown)
+				: !dropdown.contains(e.target)
+
+			if (!outside) return
+			document.body.removeEventListener('click', onbodyclick)
 			const type = 'collapsed'
 			if (current_state.opts.status.expanded) {
 				handle_expand_collapse()
