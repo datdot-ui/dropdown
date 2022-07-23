@@ -18,12 +18,12 @@ function demo () {
 		// const { notify: from_notify, address: from_address, make: from_make } = contacts.by_address[from]
 		// from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
 		// handle
-		// if (type === 'click') return handle_dropdown_menu_event(from, data)
+		if (type === 'click') handle_selected(from, data)
 	}
 	// ------------------------------
 
 	const opts_1 = {
-		name: 'dropdown_1',
+		name: 'dropdown1',
 		button_opts: {
 			text: 'Filter',
 			// mode: 'selector',
@@ -88,7 +88,7 @@ function demo () {
 	}
 
 	const opts_2 = {
-		name: 'dropdown_2',
+		name: 'dropdown2',
 		// status: { expanded: true },
 		button_opts: {
 			text: 'Filter',
@@ -129,23 +129,21 @@ function demo () {
 
 	return container
 
-	function handle_dropdown_menu_event (from, data) {
-		const dropdowns = document.querySelectorAll('i-dropdown')
-		const state = data.expanded
-		const type = state ? 'expanded' : 'collapsed'
-		const $from = contacts.by_address[from]
-		$from.notify($from.make({to: $from.address, type, data: { expanded: state }}) )
-		console.log({NAME: contacts.by_address[from].name, from, expanded: data.expanded, name: data.name })
-		dropdowns.forEach( item => {
-			const name = item.getAttribute('aria-label')
-			item.style.zIndex = '99'
-			if (name !== contacts.by_address[from].name) {
-				const $name = contacts.by_name[name]
-				$name.notify($name.make({ to: $name.address, type: 'collapsed', data: { expanded: !state } }) )
-				item.removeAttribute('style')
-			}
-		})
-	}
+    // handlers
+
+    function handle_selected (from, data) {
+        const $from = contacts.by_address[from]
+        if ($from.name === 'dropdown1') {
+            if (data === 'button-0') console.log(' Dropdown 1, Option 1 selected')
+            else if (data === 'button-1') console.log(' Dropdown 1, Option 2 selected')
+            else if (data === 'button-2') console.log(' Dropdown 1, Option 3 selected')
+        }
+        if ($from.name === 'dropdown2') {
+            if (data === 'button-3') console.log(' Dropdown 2, Option 1 selected')
+            else if (data === 'button-4') console.log(' Dropdown 2, Option 2 selected')
+            else if (data === 'button-5') console.log(' Dropdown 2, Option 3 selected')
+        }
+    }
 }
 
 const css = csjs`
