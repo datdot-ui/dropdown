@@ -1,4 +1,3 @@
-const style_sheet = require('support-style-sheet')
 const protocol_maker = require('protocol-maker')
 const i_button = require('datdot-ui-button')
 const i_list = require('datdot-ui-list')

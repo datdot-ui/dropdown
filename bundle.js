@@ -3,7 +3,6 @@ const bel = require('bel')
 const csjs = require('csjs-inject')
 const dropdown = require('..')
 const protocol_maker = require('protocol-maker')
-const make_grid = require('../src/node_modules/make-grid')
 
 var id = 0
 
@@ -410,7 +409,7 @@ body {
 `
 
 document.body.append(demo())
-},{"..":33,"../src/node_modules/make-grid":34,"bel":3,"csjs-inject":6,"protocol-maker":29}],2:[function(require,module,exports){
+},{"..":33,"bel":3,"csjs-inject":6,"protocol-maker":29}],2:[function(require,module,exports){
 var trailingNewlineRegex = /\n[\s]+$/
 var leadingNewlineRegex = /^\n[\s]+/
 var trailingSpaceRegex = /[\s]+$/
@@ -1142,7 +1141,7 @@ function scopify(css, ignores) {
 
 },{"./regex":19,"./replace-animations":20,"./scoped-name":21}],23:[function(require,module,exports){
 const protocol_maker = require('protocol-maker')
-const i_icon = require('datdot-ui-icon')
+const get_svg = require('get_svg')
 
 var id = 0
 var icon_count = 0
@@ -1168,10 +1167,13 @@ function button (opts, parent_wire) {
 		name = default_opts.name, 
 		text = default_opts.text, 
 		icons = default_opts.icons, 
-		status = default_opts.status, 
+		status: {
+			current = default_opts.status.current,
+			disabled = default_opts.status.disabled,
+		} = {},
 		theme = `` } = opts		
 	
-	const current_state =  { opts: { name, text,	icons, status, sheets: [default_opts.theme, theme] } }
+	const current_state =  { opts: { name, text,	icons, status: { disabled, current }, sheets: [default_opts.theme, theme] } }
 
 	// protocol
 	const initial_contacts = { 'parent': parent_wire }
@@ -1194,18 +1196,18 @@ function button (opts, parent_wire) {
 	let text_field = document.createElement('span')
 	text_field.className = 'text'
 
-	let i_icons = icons.map(icon => i_icon({ name: icon.name, path: icon.path}, contacts.add(`${icon.name}-${icon_count++}`)) )
-	i_icons.forEach(i_icon => { shadow.append(i_icon) })
+	var svgs = icons.map(icon => get_svg(`./src/svg/${icon.name}.svg`))
+	svgs.forEach(svg => shadow.append(svg))
 	
 	if (text) {
 			text_field.innerText = text
 			shadow.append(text_field)
 	}
 
-	if (status.disabled) el.setAttribute(`aria-disabled`, true)
-	if (status.current) el.setAttribute(`aria-current`, true)
+	if (disabled) el.setAttribute(`aria-disabled`, true)
+	if (current) el.setAttribute(`aria-current`, true)
 
-	if (!status.disabled) el.onclick = handle_click
+	if (!disabled) el.onclick = handle_click
 	el.setAttribute('aria-label', name)
 	el.setAttribute('tabindex', 0) // indicates that its element can be focused, and where it participates in sequential keyboard navigation 
 
@@ -1220,9 +1222,9 @@ function button (opts, parent_wire) {
 		const { text, icons = [], sheets } = data
 		if (icons.length) {
 			current_state.opts.icons = icons
-			i_icons.forEach(icon => { shadow.removeChild(icon) })
-			i_icons = icons.map(icon => i_icon({ name: icon.name, path: icon.path}, contacts.add(`${icon.name}-${icon_count++}`)) )
-			i_icons.forEach(i_icon => { shadow.append(i_icon) })
+			svgs.forEach(icon => { shadow.removeChild(icon) })
+			svgs = icons.map(icon => get_svg(`./src/svg/${icon.name}.svg`))
+			svgs.forEach(svg => shadow.append(svg))
 		}
 		if (text && typeof text !== 'string') {
 			current_state.opts.text = text
@@ -1382,113 +1384,9 @@ function get_theme () {
 	}
 	`
 }
-},{"datdot-ui-icon":24,"protocol-maker":29}],24:[function(require,module,exports){
-(function (__filename){(function (){
-const style_sheet = require('support-style-sheet')
-const svg = require('svg')
-const message_maker = require('message-maker')
-
-var id = 0
-
-module.exports = ({name, path, is_shadow = false, theme}, parent_protocol) => {
-// ---------------------------------------------------------------
-    const myaddress = `${__filename}-${id++}`
-    const inbox = {}
-    const outbox = {}
-    const recipients = {}
-    const names = {}
-    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
-
-    const {notify, address} = parent_protocol(myaddress, listen)
-    names[address] = recipients['parent'] = { name: 'parent', notify, address, make: message_maker(myaddress) }
-    notify(recipients['parent'].make({ to: address, type: 'ready', refs: ['old_logs', 'new_logs'] }))
-
-    function listen (msg) {
-        const {head, refs, type, data, meta } = msg
-        inbox[head.join('/')] = msg                  // store msg
-        const [from, to, msg_id] = head    
-        console.log('New message', { msg })
-    }
- // ---------------------------------------------------------------   
-    const url = path ? path : './src/svg'
-    const symbol = svg(`${url}/${name}.svg`)
-    if (is_shadow) {
-        function layout (style) {
-            const icon = document.createElement('i-icon')
-            const shadow = icon.attachShadow({mode: 'closed'})
-            const slot = document.createElement('slot')
-            slot.name = 'icon'
-            style_sheet(shadow, style)
-            slot.append(symbol)
-            shadow.append(slot)
-            shadow.addEventListener('click', handleOnClick)
-            return icon
-        }
-
-        function handleOnClick (e) {
-            console.log('Click', e)
-            const { notify, address, make } = recipients['parent']
-            notify(make({ to: address, type: 'click', data: { event: e }, refs: {} }))
-        }
-
-        // insert CSS style
-        const custom_style = theme ? theme.style : ''
-        // set CSS variables
-        if (theme && theme.props) {
-            var { fill, size } = theme.props
-        }
-        const style = `
-        :host(i-icon) {
-            --size: ${size ? size : '24px'};
-            --fill: ${fill ? fill : 'var(--primary-color)'};
-            display: block;
-        }
-        slot[name='icon'] {
-            display: grid;
-            justify-content: center;
-            align-items: center;
-        }
-        slot[name='icon'] span {
-            display: block;
-            width: var(--size);
-            height: var(--size);
-        }
-        slot[name='icon'] svg {
-            width: 100%;
-            height: auto;
-        }
-        slot[name='icon'] g {
-            fill: hsl(var(--fill));
-            transition: fill .3s ease-in-out;
-        }
-        ${custom_style}
-        `
-        return layout(style)
-    }
-
-    return symbol
-}
-
-}).call(this)}).call(this,"/node_modules/.pnpm/github.com+datdot-ui+button@62154fea7833f71621163a766a63063bf64dd6ee/node_modules/datdot-ui-icon/src/index.js")
-},{"message-maker":28,"support-style-sheet":25,"svg":26}],25:[function(require,module,exports){
-module.exports = support_style_sheet
-function support_style_sheet (root, style) {
-    return (() => {
-        try {
-            const sheet = new CSSStyleSheet()
-            sheet.replaceSync(style)
-            root.adoptedStyleSheets = [sheet]
-            return true 
-        } catch (error) { 
-            const inject_style = `<style>${style}</style>`
-            root.innerHTML = `${inject_style}`
-            return false
-        }
-    })()
-}
-},{}],26:[function(require,module,exports){
-module.exports = svg
-function svg (path) {
+},{"get_svg":24,"protocol-maker":29}],24:[function(require,module,exports){
+module.exports = get_svg
+function get_svg (path) {
     const span = document.createElement('span')
     span.classList.add('icon')
     get_svg()
@@ -1500,8 +1398,8 @@ function svg (path) {
     }
     return span
 }   
-},{}],27:[function(require,module,exports){
-const button = require('datdot-ui-button')
+},{}],25:[function(require,module,exports){
+const toggle = require('datdot-ui-toggle')
 const protocol_maker = require('protocol-maker')
 
 var id = 0
@@ -1555,8 +1453,8 @@ function list (opts, parent_wire) {
 		li.setAttribute('aria-selected', status.selected)
 		if (status.disabled) li.setAttribute('disabled', status.disabled)
 		let el 
-		const button_name = `button-${count++}`
-		el = button({ name: button_name, text, icons, status, theme }, contacts.add(button_name))
+		const toggle_name = `toggle-${count++}`
+		el = toggle({ name: toggle_name, text, icons, status, theme }, contacts.add(toggle_name))
 		shadow.append(li)
 		li.append(el)
 	})
@@ -1572,7 +1470,7 @@ function list (opts, parent_wire) {
 			const {head, type, data} = msg
 			const [from] = head
 			const $parent = contacts.by_name['parent']
-			$parent.notify($parent.make({ to: $parent.address, type: 'click', data: contacts.by_address[from].name }))        
+			$parent.notify($parent.make({ to: $parent.address, type: 'click', data: { name: contacts.by_address[from].name, pressed: data.pressed }}))        
 	}
 }
 
@@ -1661,7 +1559,234 @@ function get_theme () {
 	}
 	`
 }
-},{"datdot-ui-button":23,"protocol-maker":29}],28:[function(require,module,exports){
+},{"datdot-ui-toggle":26,"protocol-maker":29}],26:[function(require,module,exports){
+const protocol_maker = require('protocol-maker')
+const get_svg = require('get_svg')
+
+var id = 0
+var icon_count = 0
+const sheet = new CSSStyleSheet()
+const default_opts = { 
+	name: 'toggle',
+	text: '',
+	icons: [],
+	status: {
+		disabled: false,
+		pressed: false,
+	},
+	theme: get_theme()
+}
+sheet.replaceSync(default_opts.theme)
+
+module.exports = toggle
+
+toggle.help = () => { return { opts: default_opts } }
+
+function toggle (opts, parent_wire) {
+	const {
+		name = default_opts.name, 
+		text = default_opts.text, 
+		icons = default_opts.icons, 
+		status: {
+			disabled = default_opts.status.disabled,
+			pressed = default_opts.status.pressed,
+		} = {},
+		theme = `` } = opts		
+	
+	const current_state =  { opts: { name, text,	icons, status: { disabled, pressed }, sheets: [default_opts.theme, theme] } }
+
+	// protocol
+	const initial_contacts = { 'parent': parent_wire }
+	const contacts = protocol_maker('button', listen, initial_contacts)
+
+	function listen (msg) {
+			const { head, refs, type, data, meta } = msg // receive msg
+			const [from, to, msg_id] = head
+			if (type === 'help') {
+				const $from = contacts.by_address[from]
+				$from.notify($from.make({ to: $from.address, type: 'help', data: { state: get_current_state() }, refs: { cause: head }}))                         
+			}
+			if (type === 'update') handle_update(data)
+	}
+
+	// make button
+	const el = document.createElement('toggle-button')
+	const shadow = el.attachShadow({mode: 'closed'})
+
+	let text_field = document.createElement('span')
+	text_field.className = 'text'
+
+	var svgs = icons.map(icon => get_svg(`./src/svg/${icon.name}.svg`))
+	svgs.forEach(svg => shadow.append(svg))
+	
+	if (text) {
+		text_field.innerText = text
+		shadow.append(text_field)
+	}
+
+	if (disabled) el.setAttribute(`aria-disabled`, true)
+
+	if (!disabled) el.onclick = handle_click
+
+	el.classList.add('foo')
+	el.classList.add('solid')
+	el.setAttribute('aria-label', name)
+	el.setAttribute('aria-pressed', current_state.opts.status.pressed )
+	el.setAttribute('tabindex', 0) // indicates that its element can be focused, and where it participates in sequential keyboard navigation 
+
+	const custom_theme = new CSSStyleSheet()
+	custom_theme.replaceSync(theme)
+	shadow.adoptedStyleSheets = [sheet, custom_theme]
+
+	return el
+
+	// button click
+	function handle_click () {
+		current_state.opts.status.pressed = !current_state.opts.status.pressed
+		el.setAttribute('aria-pressed', current_state.opts.status.pressed )
+		const $parent = contacts.by_name['parent'] // { notify, make, address }
+		$parent.notify($parent.make({ to: $parent.address, type: 'click', data: { pressed: current_state.opts.status.pressed } }))
+	}
+	// get current state
+	function get_current_state () {
+		return  {
+			opts: current_state.opts,
+			contacts
+		}
+	}
+
+	// helpers
+	function handle_update (data) {
+		const { text, icons = [], sheets } = data
+		if (icons.length) {
+			current_state.opts.icons = icons
+			svgs.forEach(icon => { shadow.removeChild(icon) })
+			svgs = icons.map(icon => get_svg(`./src/svg/${icon.name}.svg`))
+			svgs.forEach(svg => shadow.append(svg))
+		}
+		if (text && typeof text !== 'string') {
+			current_state.opts.text = text
+			text_field.innerText = text
+			if (shadow.contains(text_field)) shadow.removeChild(text_field)
+			shadow.append(text_field)
+		}
+		if (sheets) {
+			const new_sheets = sheets.map(sheet => {
+				if (typeof sheet === 'string') {
+					current_state.opts.sheets.push(sheet)
+					const new_sheet = new CSSStyleSheet()
+					new_sheet.replaceSync(sheet)
+					return new_sheet
+					} 
+					if (typeof sheet === 'number') return shadow.adoptedStyleSheets[sheet]
+			})
+			shadow.adoptedStyleSheets = new_sheets
+		}
+	}
+
+}
+
+function get_theme () {
+	return `
+		:root {
+			--b: 0, 0%;
+			--r: 100%, 50%;
+			--color-black: var(--b), 0%;
+			--color-greyF2: var(--b), 95%;
+			--color-orange: 32, var(--r);
+			--size16: 1.6rem;
+			--weight300: 300;
+			--primary-color: var(--color-black);
+			--primary-color-focus: var(--color-orange);
+			--primary-bg-color: var(--color-greyF2);
+			--primary-size: var(--size16);
+	}
+	:host(toggle-button) {
+			--size: var(--primary-size);
+			--weight: var(--weight300);
+			--color: var(--primary-color);
+			--color-focus: var(--primary-color-focus);
+			--bg-color: var(--primary-bg-color);
+			--bg-color-focus: var(--primary-bg-color-focus);
+			--opacity: 1;
+			--padding: 12px;
+			--margin: 0;
+			--border-width: 0px;
+			--border-style: solid;
+			--border-color: var(--primary-color);
+			--border-opacity: 1;
+			--border: var(--border-width) var(--border-style) hsla(var(--border-color), var(--border-opacity));
+			--border-radius: var(--primary-radius);
+			--offset_x: 0px;
+			--offset-y: 6px;
+			--blur: 30px;
+			--shadow-color: var(--primary-color);
+			--shadow-opacity: 0;
+			--box-shadow: var(--offset_x) var(--offset-y) var(--blur) hsla( var(--shadow-color), var(--shadow-opacity) );
+			display: inline-grid;
+			grid-auto-flow: column;
+			gap: 5px;
+			justify: content-center;
+			align: items-center;
+			width: var(--width);
+			height: var(--height);
+			max-width: 100%;
+			font-size: var(--size);
+			font-weight: var(--weight);
+			color: hsl( var(--color) );
+			background-color: hsla( var(--bg-color), var(--opacity) );
+			border: var(--border);
+			border-radius: var(--border-radius);
+			box-shadow: var(--box-shadow);
+			padding: var(--padding);
+			transition: font-size .3s, font-weight .15s, color .3s, background-color .3s, opacity .3s, border .3s, box-shadow .3s ease-in-out;
+			cursor: pointer;
+			-webkit-mask-image: -webkit-radial-gradient(white, black);
+	}
+	:host(toggle-button:hover) {
+			--size: var(--primary-size-hover);
+			--weight: var(--primary-weight-hover);
+			--color: var(--primary-color-hover);
+			--bg-color: var(--primary-bg-color-hover);
+			--border-color: var(--primary-color-hover);
+			--offset-x: 0;
+			--offset-y: 0;
+			--blur: 50px;
+			--shadow-color: var(--primary-color-hover);
+			--shadow-opacity: 0;
+	}
+	:host(toggle-button[aria-pressed="true"]) {
+			--color: var(--primary-color-focus);
+			--bg-color: var(--bg-color-focus);
+			background-color: hsla(var(--bg-color));
+	}
+	:host(toggle-button) g {
+			--icon-fill: var(--primary-icon-fill);
+			fill: hsl(var(--icon-fill));
+			transition: fill 0.05s ease-in-out;
+	}
+	:host(toggle-button:hover) g {
+		--icon-fill: var(--primary-icon-fill-hover);
+	}
+	:host(toggle-button[aria-pressed="true"]:hover) g {
+		--icon-fill: var(--primary-color-hover);
+	}
+	:host(toggle-button[aria-disabled="true"]), 
+	:host(toggle-button[aria-disabled="true"]:hover) {
+			--size: var(--primary-disabled-size);
+			--color: var(--primary-disabled-color);
+			--bg-color: var(--primary-disabled-bg-color);
+			cursor: not-allowed;
+	}
+	:host(toggle-button[disabled]) g, 
+	:host(toggle-button[disabled]:hover) g, 
+	:host(toggle-button) .text {
+	}
+	`
+}
+},{"get_svg":27,"protocol-maker":29}],27:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],28:[function(require,module,exports){
 module.exports = function message_maker (from) {
   let msg_id = 0
   return function make ({to, type, data = null, refs = {} }) {
@@ -2145,7 +2270,6 @@ module.exports = function (css, options) {
 };
 
 },{}],33:[function(require,module,exports){
-const style_sheet = require('support-style-sheet')
 const protocol_maker = require('protocol-maker')
 const i_button = require('datdot-ui-button')
 const i_list = require('datdot-ui-list')
@@ -2320,83 +2444,4 @@ function get_theme () {
 }
 
 
-},{"datdot-ui-button":23,"datdot-ui-list":27,"protocol-maker":29,"support-style-sheet":35}],34:[function(require,module,exports){
-module.exports = make_grid
-
-function make_grid (opts = {}) {
-    const {areas, area, rows, columns, row, auto = {}, column, gap, justify, align} = opts
-    let style = ''
-    grid_init ()
-    return style
-
-    function grid_init () {
-        make_rows()
-        make_columns()
-        make_auto()
-        make_row()
-        make_column()
-        make_justify()
-        make_align()
-        make_gap()
-        make_area()
-        make_areas()
-    }
-     
-    function make_areas () {
-        if (typeof areas === 'object') {
-            let template = `grid-template-areas:`
-            areas.map( a => template += `"${a}"`)
-            return style += template + ';'
-        }
-        if (typeof areas === 'string') return areas ? style +=`grid-template-areas: "${areas}";` : ''
-    }
-    function make_area () {
-        return area ? style += `grid-area: ${area};` : ''
-    }
-
-    function make_rows () { 
-        return rows ? style +=  `grid-template-rows: ${rows};` : ''
-    }
-
-    function make_columns () {
-        return columns ? style += `grid-template-columns: ${columns};` : ''
-    }
-
-    function make_row () {
-        return row ? style += `grid-row: ${row};` : ''
-    }
-
-    function make_column () {
-        return column ? style += `grid-column: ${column};` : ''
-    }
-
-    function make_justify () {
-        if (justify === void 0) return
-        const result = justify.split('-')
-        const [type, method] = result
-        return style += `justify-${type}: ${method};`
-    }
-
-    function make_align () {
-        if (align === void 0) return
-        const result = align.split('-')
-        const [type, method] = result
-        return style += `align-${type}: ${method};`
-    }
-
-    function make_gap () {
-        if (gap === void 0) return ''
-        return style += `gap: ${gap};`
-    }
-
-    function make_auto () {
-        const {auto_flow = null, auto_rows = null, auto_columns = null} = auto
-        const grid_auto_flow = auto_flow ? `grid-auto-flow: ${auto_flow};` : ''
-        const grid_auto_rows = auto_rows ? `grid-auto-rows: ${auto_rows};` : ''
-        const grid_auto_columns = auto_columns ? `grid-auto-columns: ${auto_columns};` : ''
-        return style += `${grid_auto_flow}${grid_auto_rows}${grid_auto_columns}`
-    }
-}
-},{}],35:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}]},{},[1]);
+},{"datdot-ui-button":23,"datdot-ui-list":25,"protocol-maker":29}]},{},[1]);

@@ -2,7 +2,6 @@ const bel = require('bel')
 const csjs = require('csjs-inject')
 const dropdown = require('..')
 const protocol_maker = require('protocol-maker')
-const make_grid = require('../src/node_modules/make-grid')
 
 var id = 0
 
