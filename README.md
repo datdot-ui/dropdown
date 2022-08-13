@@ -18,15 +18,13 @@ Outgoing message types
 
 **parent**
 - `any incoming message`
-- `changed`
-- `collapsed`
+- `click`
 
 **button**
-- `changed`
-- `collapsed`
+- `update`
 
 **list**
-- `collapsed`
+- `update`
 
 **any**
 - `help`
