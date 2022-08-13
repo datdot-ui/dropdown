@@ -9,42 +9,23 @@ function demo () {
 // ------------------------------
 	const contacts = protocol_maker('demo', listen) 
 	function listen (msg) {
-		// console.log('New message', { msg })
 		const { head, refs, type, data, meta } = msg // receive msg
 		const [from] = head
-		// send back ack
-		// const { notify: from_notify, address: from_address, make: from_make } = contacts.by_address[from]
-		// from_notify(from_make({ to: from_address, type: 'ack', refs: { 'cause': head } }))
-		// handle
 		if (type === 'click') handle_selected(from, data)
 	}
 	// ------------------------------
 
 	const opts_1 = {
 		name: 'dropdown1',
-		button_opts: {
-			text: 'Filter',
-			// mode: 'selector',
-			icons: [
-				{name: 'filter'},
-			],
+		button: {
+			text: 'Selector',
+			icons: [{ name: 'selector'},],
 		},
-		list_opts: {
+		list: {
 			body: [
-				{
-					text: 'Option1',
-					icons: [{ name: 'star' }],
-					status: { selected: true }
-				},
-				{
-					text: 'Option2',
-					icons: [{ name: 'star' }],
-				},
-				{
-					text: 'Option3',
-					icons: [{ name: 'star'}],
-					status: { selected: true }
-				}
+        { text: 'Option1', icons: [{ name: 'star' }], status: { pressed: true } },
+				{ text: 'Option2',  icons: [{ name: 'star' }], },
+				{ text: 'Option3', icons: [{ name: 'star'}] }
 			],
 		},
 		theme: `
@@ -87,40 +68,94 @@ function demo () {
 
 	const opts_2 = {
 		name: 'dropdown2',
-		// status: { expanded: true },
-		button_opts: {
-			text: 'Filter',
-			// mode: 'selector',
-			icons: [
-				{name: 'filter'},
-			],
-		},
-		list_opts: {
+		status: { expanded: true },
+		button: { text: 'Menu', icons: [{name: 'menu'},], },
+		list: {
 			body: [
-				{
-					text: 'Option1',
-					icons: [{ name: 'star' }],
-					status: { selected: true }
-				},
-				{
-					text: 'Option2',
-					icons: [{ name: 'star' }],
-				},
-				{
-					text: 'Option3',
-					icons: [{ name: 'star'}],
-					status: { selected: true }
-				}
+				{ text: 'Option1', icons: [{ name: 'star' }], },
+				{ text: 'Option2', icons: [{ name: 'star' }], },		
+				{ text: 'Option3', icons: [{ name: 'star'}] }
 			],
 		}
 	}
-	
+
+	const filter_btn_theme = `
+		:host(toggle-button) {
+			width: 165px;
+			background-color: #000;
+			border-radius: 0;
+			color: white;
+			justify-content: flex-start;
+		}
+		:host(toggle-button:hover) {
+			background-color: grey;
+		}
+		:host(toggle-button) svg, :host(toggle-button) g {
+			fill: var(--circle-color);
+			width: 12px;
+			height: 12px;
+		}
+		:host(toggle-button) .icon {
+			margin: 0 5px 0 15px;
+		}
+	` 
+	const opts_3 = {
+		name: 'filter',
+		button: { 
+			icons: [{ name: 'filter' }], 
+		theme:`
+			:host(i-button) {
+				width: 44px;
+				background-color: #000;
+			}
+			:host(i-button:hover) {
+				background-color: grey;
+			}
+			:host(i-button:focus) {
+				background-color: #000;
+			}
+			:host(i-button) g {
+				fill: white;
+			}
+			:host(i-button:hover) g {
+				fill: orange;
+			}
+		` 
+		},
+		list: {
+			theme: `
+				:host(i-list) {
+					width: 44px;
+					color: white;
+				}
+				:host(i-list) li {
+					border: none;
+					border-radius: 0;
+					width: 44px;
+				}
+				:host(i-list) li:first-child {
+					margin-top: 10px;
+				}
+			`,
+			body: [
+				{ text: 'Available', icons: [{ name: 'circle' }], icons: [{ name: 'circle' }], theme: filter_btn_theme + `:host { --circle-color: green; } :host(toggle-button) { border-top-left-radius: 8px; border-top-right-radius: 8px; }` },
+				{ text: 'Not available', icons: [{ name: 'circle' }], theme: filter_btn_theme + `:host { --circle-color: red; }`},
+				{ text: 'Hypercore', icons: [{ name: 'circle' }], theme: filter_btn_theme + `:host { --circle-color: pink; }` },
+				{ text: 'Hyperdrive', icons: [{ name: 'circle' }], theme: filter_btn_theme + `:host { --circle-color: purple; }` },
+				{ text: 'Cabal', icons: [{ name: 'circle' }], theme: filter_btn_theme + `:host { --circle-color: white; } :host(toggle-button) { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }` },
+			]
+		}	
+	}
+
 	const dropdown_1 = dropdown(opts_1, contacts.add(opts_1.name))
 	const dropdown_2 = dropdown(opts_2, contacts.add(opts_2.name))
+	const dropdown_3 = dropdown(opts_3, contacts.add(opts_3.name))
 	
 	const container = bel` 
 	<div class="${css.content}">
 		<h1>Dropdown</h1>
+		<aside class="${css.example}"><h2>Filter</h2>${dropdown_3}</aside>
+		<br><br><br><br><br><br><br><br><br><br><br><br>
 		<aside class="${css.example}"><h2>Example Up</h2>${dropdown_1}</aside>
 		<aside class="${css.example}"><h2>Example Down</h2>${dropdown_2}</aside>
 	</div>`
@@ -129,19 +164,19 @@ function demo () {
 
     // handlers
 
-    function handle_selected (from, data) {
-        const $from = contacts.by_address[from]
-        if ($from.name === 'dropdown1') {
-            if (data === 'button-0') console.log(' Dropdown 1, Option 1 selected')
-            else if (data === 'button-1') console.log(' Dropdown 1, Option 2 selected')
-            else if (data === 'button-2') console.log(' Dropdown 1, Option 3 selected')
-        }
-        if ($from.name === 'dropdown2') {
-            if (data === 'button-3') console.log(' Dropdown 2, Option 1 selected')
-            else if (data === 'button-4') console.log(' Dropdown 2, Option 2 selected')
-            else if (data === 'button-5') console.log(' Dropdown 2, Option 3 selected')
-        }
-    }
+	function handle_selected (from, data) {
+		const $from = contacts.by_address[from]
+		if ($from.name === 'dropdown1') {
+			setTimeout(() => {
+				$from.notify($from.make({to: $from.address, type: 'update', data: { button: { text: 'I am updated' } } }) )
+				$from.notify($from.make({to: $from.address, type: 'update', 
+					data: { 
+						list: { body: [ { text: 'Foo', icons: [{ name: 'star' }], },],
+						button: { text: 'I am updated' }
+				} } }) )
+			}, 2000)
+		}
+	}
 }
 
 const css = csjs`

@@ -4,18 +4,14 @@ DatDot UI component
 Opts
 ---
 
-`{name, button = {}, list = {}, expanded = true, disabled = false, mode = 'listbox-single', theme}`
+`{ name, button = {}, list = {}, status: { expanded: false }, theme }`
 
-Roles
+Incoming message types
 ---
 
-/
-
-Incomming message types
----
-
-- `expanded/collapsed`
-- `selected/unselected`
+- `click`
+- `update`
+- `help`
 
 Outgoing message types
 ---
@@ -31,3 +27,6 @@ Outgoing message types
 
 **list**
 - `collapsed`
+
+**any**
+- `help`

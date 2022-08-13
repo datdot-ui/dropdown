@@ -7,8 +7,8 @@ var count = 0
 const sheet = new CSSStyleSheet()
 const default_opts = {
 	name: 'dropdown',
-	button_opts: { name: 'button'},
-	list_opts: { name: 'list' },
+	button: { name: 'button'},
+	list: { name: 'list' },
 	status: { disabled: false, expanded: false },
 	theme: get_theme()
 }
@@ -27,17 +27,20 @@ function dropdown (opts, parent_wire) {
 		const { head, refs, type, data, meta } = msg // receive msg
 		const [from, to, msg_id] = head
 		console.log('DROPDOWN', { from, type, name: contacts.by_address[from].name, data })
-		// handle
 		const $from = contacts.by_address[from]
 		$parent.notify($parent.make({ to: $parent.address, type, data }))
 		if (type == 'click' && $from.name === button_name) return handle_expand_collapse()
+		if (type === 'update') handle_update(data)
+		if (type === 'help') {
+			$from.notify($from.make({ to: $from.address, type: 'help', data: { state: get_current_state() }, refs: { cause: head }}))
+		}
 	}
 	const $parent = contacts.by_name['parent']
 // -----------------------------------------
 	const {
 		name = default_opts.name, 
-		button_opts = default_opts.button_opts, 
-		list_opts = default_opts.list_opts,
+		button = default_opts.button, 
+		list = default_opts.list,
 		status: {
 			disabled = default_opts.status.disabled,
 			expanded = default_opts.status.expanded,
@@ -45,7 +48,9 @@ function dropdown (opts, parent_wire) {
 		theme = ``
 	} = opts
 
-	const current_state =  { opts: { name, button_opts, list_opts, status: { disabled, expanded }, sheets: [default_opts.theme, theme] } }
+	button.sheets = [button.theme]
+	list.sheets = [list.theme]
+	const current_state =  { opts: { name, button, list, status: { disabled, expanded }, sheets: [default_opts.theme, theme] } }
 
 	const list_name = `${name}-list`
 	const button_name = `${name}-button`
@@ -56,14 +61,14 @@ function dropdown (opts, parent_wire) {
 	dropdown.setAttribute('aria-label', name)
 	if (current_state.opts.status.is_disabled) dropdown.setAttribute('disabled', current_state.opts.status.is_disabled)
 
-	const button = i_button(button_opts, contacts.add(button_name))
-	const list = i_list(list_opts, contacts.add(list_name))
+	const button_el = i_button(button, contacts.add(button_name))
+	const list_el = i_list(list, contacts.add(list_name))
 
-	shadow.append(list)
-	shadow.append(button)
+	shadow.append(list_el)
+	shadow.append(button_el)
 
-	list.setAttribute('aria-hidden', !current_state.opts.status.expanded)
-	if (!current_state.opts.status.expanded)  list.style.visibility = 'hidden'
+	list_el.setAttribute('aria-hidden', !current_state.opts.status.expanded)
+	if (!current_state.opts.status.expanded)  list_el.style.visibility = 'hidden'
 
 	const custom_theme = new CSSStyleSheet()
 	custom_theme.replaceSync(theme)
@@ -74,14 +79,14 @@ function dropdown (opts, parent_wire) {
 	// HANDLERS
 	async function handle_expand_collapse () {
 		current_state.opts.status.expanded = !current_state.opts.status.expanded
-		list.setAttribute('aria-hidden', !current_state.opts.status.expanded)
+		list_el.setAttribute('aria-hidden', !current_state.opts.status.expanded)
 		if (current_state.opts.status.expanded) {
-			list.style.visibility = 'visible'
+			list_el.style.visibility = 'visible'
 			document.body.addEventListener('click', onbodyclick)
 		} else {
 			document.body.removeEventListener('click', onbodyclick)
 			await new Promise(ok => setTimeout(ok, 300))
-			list.style.visibility = 'hidden'
+			list_el.style.visibility = 'hidden'
 		}
 		$parent.notify($parent.make({ to: $parent.address, type: 'click', data: current_state.opts.status.expanded }))
 	}
@@ -90,22 +95,53 @@ function dropdown (opts, parent_wire) {
 			const outside = typeof e.composedPath === 'function' ?
 				!e.composedPath().includes(dropdown)
 				: !dropdown.contains(e.target)
-
 			if (!outside) return
 			document.body.removeEventListener('click', onbodyclick)
 			const type = 'collapsed'
-			if (current_state.opts.status.expanded) {
-				handle_expand_collapse()
-				// notify button
-				const $button = contacts.by_name[button_name]
-				$button.notify($button.make({ to: $button.address, type, data: current_state.opts.status.expanded }))
-				// notify list
-				const $list = contacts.by_name[list_name]
-				$list.notify($list.make({ to: $list.address, type, data: current_state.opts.status.expanded }))
-				// notify parent
-				const $parent = contacts.by_name['parent']
-				$parent.notify($parent.make({to: $parent.address, type }) )
+			if (current_state.opts.status.expanded) handle_expand_collapse()
+	}
+	function handle_update (data) {
+		const { button, list, sheets } = data
+		if (button) {
+			const $button = contacts.by_name[button_name]
+			const { text, icons, theme } = button
+			if (text) current_state.opts.button.text = text
+			if (icons) current_state.opts.button.icons = text
+			if (theme)  {
+				current_state.opts.button.sheets.push(theme)
+				button.sheets = current_state.opts.button.sheets
 			}
+			$button.notify($button.make({ to: $button.address, type: 'update', data: button }))
+		}
+		if (list) {
+			const { body, theme } = list
+			if (body)  current_state.opts.list.body = body
+			if (theme)  {
+				current_state.opts.list.sheets.push(theme)
+				list.sheets = current_state.opts.list.sheets
+			}
+			const $list = contacts.by_name[list_name]
+			$list.notify($list.make({ to: $list.address, type: 'update', data: list }))
+
+		}
+		if (sheets) {
+			const new_sheets = sheets.map(sheet => {
+				if (typeof sheet === 'string') {
+					current_state.opts.sheets.push(sheet)
+					const new_sheet = new CSSStyleSheet()
+					new_sheet.replaceSync(sheet)
+					return new_sheet
+					} 
+					if (typeof sheet === 'number') return shadow.adoptedStyleSheets[sheet]
+			})
+			shadow.adoptedStyleSheets = new_sheets
+		}
+	}
+	function get_current_state () {
+		return  {
+			opts: current_state.opts,
+			contacts
+		}
 	}
 }
 
